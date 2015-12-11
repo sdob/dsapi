@@ -39,15 +39,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders', # CORS headers for Django
+    'divesites', # Divesite and Dive models
     'myauth', # custom User model
     'profiles', # rich User profiles
     'rest_framework', # REST API framework
-    'divesites', # Divesite and Dive models
+    'rest_framework.authtoken', # Token-based authentication
 ]
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware', # CORS middleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -126,3 +129,11 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+REST_FRAMEWORK = {
+        'DEFAULT_AUTHENTICATION_CLASSES': (
+            'rest_framework.authentication.TokenAuthentication',
+            )
+        }
+
+# XXX: for development only!
+CORS_ORIGIN_ALLOW_ALL = True

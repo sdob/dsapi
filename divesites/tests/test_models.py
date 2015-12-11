@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 from rest_framework.test import APITestCase
+
 from divesites.models import Divesite
 from divesites import factories
 

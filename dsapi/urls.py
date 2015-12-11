@@ -17,7 +17,16 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+from rest_framework.routers import DefaultRouter
+import divesites.views
+import profiles.views
+
+router = DefaultRouter()
+router.register(r'divesites', divesites.views.DivesiteViewSet)
+router.register(r'dives', divesites.views.DiveViewSet)
+router.register(r'users', profiles.views.ProfileViewSet)
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^', include('divesites.urls')),
+    url(r'^', include(router.urls))
 ]

@@ -1,4 +1,7 @@
 import factory
+import numpy as np
+import random
+
 from datetime import timedelta
 from django.utils import timezone
 from faker import Factory as FakerFactory
@@ -16,6 +19,10 @@ class DivesiteFactory(factory.DjangoModelFactory):
     latitude = factory.Faker('latitude')
     longitude = factory.Faker('longitude')
     owner = factory.SubFactory(UserFactory)
+    @factory.lazy_attribute
+    def level(self):
+        return faker.random_int(min=0, max=2)
+
 
 class DiveFactory(factory.DjangoModelFactory):
     class Meta:
@@ -23,6 +30,9 @@ class DiveFactory(factory.DjangoModelFactory):
 
     divesite = factory.SubFactory(DivesiteFactory)
     diver = factory.SubFactory(UserFactory)
+    @factory.lazy_attribute
+    def depth(self):
+        return random.randint(10, 100)
     @factory.lazy_attribute
     def start_time(self):
         dt = faker.date_time_this_year(before_now=True, after_now=False)
