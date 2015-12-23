@@ -154,7 +154,6 @@ class DiveCreateTestCase(APITestCase):
 
     def test_authenticated_create_succeeds(self):
         count = Dive.objects.count()
-        print self.data
         self.assertTrue(Divesite.objects.filter(id=self.ds.id).exists())
         self.client.force_authenticate(self.user)
         result = self.client.post(reverse('dive-list'), self.data)

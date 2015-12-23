@@ -49,9 +49,6 @@ class Divesite(models.Model):
     owner = models.ForeignKey(AUTH_USER_MODEL, related_name="divesites")
     creation_date = models.DateTimeField(auto_now_add=True)
 
-    def _get_profile(self):
-        return self.owner.profile
-
     def clean(self):
         validate_latitude(self.latitude)
         validate_longitude(self.longitude)
@@ -75,9 +72,6 @@ class Dive(models.Model):
     start_time = models.DateTimeField() # TODO: Must be in the past (i.e., date + duration < now)
     # Creation metadata
     creation_date = models.DateTimeField(auto_now_add=True)
-
-    def _get_profile(self):
-        return self.diver.profile
 
     def clean(self):
         # For now we'll be explicit about validating
