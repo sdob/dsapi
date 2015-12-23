@@ -9,6 +9,9 @@ from .permissions import IsProfileOwnerOrReadOnly
 from .serializers import ProfileSerializer
 from divesites.models import Dive, Divesite
 from divesites.serializers import DiveSerializer, DivesiteSerializer
+from activity.models import Activity
+import activity.serializers
+
 
 class ProfileViewSet(viewsets.GenericViewSet,
         mixins.UpdateModelMixin,
@@ -33,3 +36,13 @@ class ProfileViewSet(viewsets.GenericViewSet,
         divesites = Divesite.objects.filter(owner=profile.user)
         serializer = DivesiteSerializer(divesites, many=True)
         return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def recent_activity(self, request, pk):
+        # set an arbitrary upper level
+        queryset = Profile.objects.all()
+        max_items = 10
+        profile = get_object_or_404(queryset, pk=pk)
+        activities = Activity.objects.filter(user=profile.user).select_subclasses()[:max_items]
+        data = [activity.serializers.serializer_factory(_)(_).data for _ in activities]
+        return Response(data)

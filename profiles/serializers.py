@@ -24,6 +24,7 @@ class UnattributedDiveSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
+        depth = 1
         #fields = ('id', 'name', 'dives',)
     dives = UnattributedDiveSerializer(source='user.dives', many=True, read_only=True)
     divesites = UnattributedDivesiteSerializer(source='user.divesites', many=True, read_only=True)

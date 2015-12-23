@@ -8,7 +8,6 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from dsapi.settings import AUTH_USER_MODEL
 import numpy as np
-#from profiles.models import Profile
 
 def validate_duration(value):
     if value <= timedelta(seconds=0):
@@ -35,8 +34,8 @@ class Divesite(models.Model):
         (1, 'Intermediate',),
         (2, 'Advanced',),
         ))
-    # TODO: eventually, we'll extract this information from logged dives rather than
-    # have a single field on the Divesite model
+    # For site depth, use the mean of the dives logged at this site, or
+    # return 0 as a default if nobody's logged a dive here.
     def get_average_maximum_depth(self):
         if self.dives.all():
             return np.mean([_.depth for _ in self.dives.all()])
@@ -48,7 +47,7 @@ class Divesite(models.Model):
     longitude = models.DecimalField(max_digits=10, decimal_places=7, validators=[validate_longitude])
     # Creation metadata
     owner = models.ForeignKey(AUTH_USER_MODEL, related_name="divesites")
-    #creation_date = models.DateTimeField(auto_add=True)
+    creation_date = models.DateTimeField(auto_now_add=True)
 
     def _get_profile(self):
         return self.owner.profile
@@ -74,6 +73,8 @@ class Dive(models.Model):
     diver = models.ForeignKey(AUTH_USER_MODEL, related_name="dives")
     duration = models.DurationField() # TODO: Must be greater than 0
     start_time = models.DateTimeField() # TODO: Must be in the past (i.e., date + duration < now)
+    # Creation metadata
+    creation_date = models.DateTimeField(auto_now_add=True)
 
     def _get_profile(self):
         return self.diver.profile

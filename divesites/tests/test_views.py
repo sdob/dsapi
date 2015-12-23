@@ -36,7 +36,7 @@ class DivesiteSafeViewsTestCase(APITestCase):
         result = self.client.get(reverse('divesite-detail', args=[ds.id]))
         self.assertEqual(result.status_code, status.HTTP_200_OK)
 
-    def test_detail_view_returns_expected_item(self):
+    def test_detail_view_returns_expected_fields(self):
         ds = Divesite.objects.all()[0]
         data = self.client.get(reverse('divesite-detail', args=[ds.id])).data
         self.assertEqual(data['name'], ds.name)
@@ -144,6 +144,7 @@ class DiveCreateTestCase(APITestCase):
                 'start_time': faker.date_time_this_year(),
                 'divesite': self.ds.id
                 }
+        d = DiveFactory(divesite=self.ds)
 
     def test_unauthenticated_create_fails(self):
         count = Dive.objects.count()
@@ -153,6 +154,8 @@ class DiveCreateTestCase(APITestCase):
 
     def test_authenticated_create_succeeds(self):
         count = Dive.objects.count()
+        print self.data
+        self.assertTrue(Divesite.objects.filter(id=self.ds.id).exists())
         self.client.force_authenticate(self.user)
         result = self.client.post(reverse('dive-list'), self.data)
         self.assertEqual(result.status_code, status.HTTP_201_CREATED)

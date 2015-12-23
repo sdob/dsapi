@@ -109,3 +109,38 @@ class ProfileUpdateTestCase(APITestCase):
         response = self.client.patch(reverse('profile-detail', args=[self.p.id]), data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(Profile.objects.get(id=self.p.id).name, old_name)
+
+
+class ProfileActivityTestCase(APITestCase):
+
+    def setUp(self):
+        u = UserFactory()
+        u.profile.name = faker.name()
+        u.profile.save()
+        self.profile = u.profile
+        self.ds = DivesiteFactory(owner=u)
+        self.d = DiveFactory(diver=u, divesite=self.ds)
+
+    def test_user_activity_feed(self):
+        response = self.client.get(reverse('profile-recent-activity', args=[self.profile.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, list)
+        self.assertEqual(len(response.data), 2)
+
+    def test_empty_activity_feed(self):
+        p = UserFactory().profile
+        response = self.client.get(reverse('profile-recent-activity', args=[p.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, list)
+        self.assertEqual(len(response.data), 0)
+
+    def test_unauthenticated_post_fails(self):
+        data = {}
+        response = self.client.post(reverse('profile-recent-activity', args=[self.profile.id]))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_authenticated_post_fails(self):
+        data = {}
+        self.client.force_authenticate(self.profile.user)
+        response = self.client.post(reverse('profile-recent-activity', args=[self.profile.id]))
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)

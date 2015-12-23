@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'divesites', # Divesite and Dive models
     'myauth', # custom User model
     'profiles', # rich User profiles
+    'activity', # User activity
     'rest_framework', # REST API framework
     'rest_framework.authtoken', # Token-based authentication
 ]
