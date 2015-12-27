@@ -13,3 +13,4 @@ def validate_longitude(value):
     if not -180 <= value <= 180:
         raise ValidationError('%s is not a valid longitude' % value)
 
+

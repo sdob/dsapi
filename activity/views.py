@@ -1,3 +1,1 @@
-from django.shortcuts import render
-
-# Create your views here.
+# Activity objects may not ever have views

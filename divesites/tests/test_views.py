@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.utils import timezone
 from datetime import timedelta
 import random
@@ -82,6 +83,14 @@ class DivesiteCreateTestCase(APITestCase):
         result = self.client.post(self.url, self.data)
         self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_divesite_cant_be_too_close_to_existing_divesite(self):
+        ds = DivesiteFactory()
+        self.data['latitude'] = ds.latitude + Decimal(0.0009)
+        self.data['longitude'] = ds.longitude + Decimal(0.0009)
+        self.client.force_authenticate(self.u)
+        result = self.client.post(self.url, self.data)
+        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class DivesiteUpdateTestCase(APITestCase):
 
@@ -103,6 +112,15 @@ class DivesiteUpdateTestCase(APITestCase):
         result = self.client.patch(reverse('divesite-detail', args=[self.ds.id]), data)
         self.assertEqual(result.status_code, status.HTTP_200_OK)
         self.assertEqual(Divesite.objects.get(id=self.ds.id).name, 'New Divesite Name')
+
+    def test_divesite_cant_be_too_close_to_existing_divesite(self):
+        ds = DivesiteFactory()
+        data = {}
+        data['latitude'] = ds.latitude + Decimal(0.0009)
+        data['longitude'] = ds.longitude + Decimal(0.0009)
+        self.client.force_authenticate(self.user)
+        result = self.client.patch(self.url, data)
+        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_only_divesite_owner_can_update(self):
         data = {'name': 'New Divesite Name'}
@@ -215,6 +233,9 @@ class DiveCreateTestCase(APITestCase):
             self.data['duration'] = duration
             result = self.client.post(self.url, self.data)
             self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_new_divesite_cannot_be_within_100_m_of_existing_divesite(self):
+        pass
 
 
 class DiveUpdateTestCase(APITestCase):
