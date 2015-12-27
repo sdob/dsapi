@@ -54,7 +54,10 @@ class DivesiteCreateTestCase(APITestCase):
         longitude = faker.longitude()
         name = "Test Divesite"
         level = 0
-        self.data = {"latitude": latitude, "longitude": longitude, "name": name, "level": level}
+        self.data = {"latitude": latitude, "longitude": longitude, "name": name, "level": level,
+                "boat_entry":  True, "shore_entry": True
+                }
+        self.url = reverse('divesite-list')
 
     def test_unauthenticated_create_returns_401(self):
         result = self.client.post(reverse('divesite-list'), self.data)
@@ -77,12 +80,28 @@ class DivesiteCreateTestCase(APITestCase):
         self.assertEqual(Divesite.objects.count(), count + 1)
         self.assertTrue(Divesite.objects.filter(name=self.data['name']).exists())
 
+    def test_at_least_one_entry_type_must_be_true(self):
+        count = Divesite.objects.count()
+        self.client.force_authenticate(self.u)
+        self.data['boat_entry'] = self.data['shore_entry'] = False
+        result = self.client.post(self.url, self.data)
+        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Divesite.objects.count(), count)
+
+    def test_level_must_be_one_of_choices(self):
+        self.client.force_authenticate(self.u)
+        count = Divesite.objects.count()
+        self.data['level'] = -1
+        result = self.client.post(self.url, self.data)
+        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class DivesiteUpdateTestCase(APITestCase):
 
     def setUp(self):
         self.user = UserFactory()
         self.ds = DivesiteFactory(owner=self.user)
+        self.url = reverse('divesite-detail', args=[self.ds.id])
 
     def test_unauthenticated_update_returns_401(self):
         data = {'name': 'New Divesite Name'}
@@ -112,6 +131,18 @@ class DivesiteUpdateTestCase(APITestCase):
         self.client.force_authenticate(self.user)
         result = self.client.patch(reverse('divesite-detail', args=[self.ds.id]), data)
         self.assertEqual(Divesite.objects.get(id=self.ds.id).name, old_name)
+
+    def test_one_entry_type_must_be_true(self):
+        self.client.force_authenticate(self.user)
+        data = {'boat_entry': False, 'shore_entry': False}
+        result = self.client.patch(self.url, data)
+        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_level_must_be_one_of_choices(self):
+        self.client.force_authenticate(self.user)
+        data = {'level': -1}
+        result = self.client.patch(self.url, data)
+        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class DiveSafeViewsTestCase(APITestCase):
@@ -163,10 +194,11 @@ class DiveCreateTestCase(APITestCase):
                 'divesite': self.ds.id
                 }
         d = DiveFactory(divesite=self.ds)
+        self.url = reverse('dive-list')
 
     def test_unauthenticated_create_fails(self):
         count = Dive.objects.count()
-        result = self.client.post(reverse('dive-list'), self.data)
+        result = self.client.post(self.url, self.data)
         self.assertEqual(result.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(Dive.objects.count(), count)
 
@@ -174,9 +206,17 @@ class DiveCreateTestCase(APITestCase):
         count = Dive.objects.count()
         self.assertTrue(Divesite.objects.filter(id=self.ds.id).exists())
         self.client.force_authenticate(self.user)
-        result = self.client.post(reverse('dive-list'), self.data)
+        result = self.client.post(self.url, self.data)
         self.assertEqual(result.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Dive.objects.count(), count + 1)
+
+    def test_duration_must_be_positive(self):
+        self.client.force_authenticate(self.user)
+        durations = [-1, 0]
+        for duration in durations:
+            self.data['duration'] = duration
+            result = self.client.post(self.url, self.data)
+            self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class DiveUpdateTestCase(APITestCase):
@@ -266,3 +306,4 @@ class DiveUpdateTestCase(APITestCase):
         result = self.client.patch(self.url, data)
         # TODO: view should throw exception instead of returning 200
         self.assertEqual(Dive.objects.get(id=self.dive.id).diver, self.user)
+

@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from .serializers import DiveSerializer, DivesiteSerializer
 from .models import Dive, Divesite
 from .permissions import IsDiverOrReadOnly, IsOwnerOrReadOnly
-
+import activity.serializers
 
 class DivesiteViewSet(viewsets.ModelViewSet):
 
