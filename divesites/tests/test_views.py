@@ -24,23 +24,17 @@ class DivesiteSafeViewsTestCase(APITestCase):
         for _ in xrange(NUM_SITES):
             ds = factories.DivesiteFactory()
 
-    def test_list_view_returns_200(self):
-        result = self.client.get(reverse('divesite-list'))
-        self.assertEqual(result.status_code, status.HTTP_200_OK)
-
     def test_list_view_returns_list(self):
         result = self.client.get(reverse('divesite-list'))
         self.assertIsInstance(result.data, list)
-        self.assertEqual(len(result.data), NUM_SITES)
-
-    def test_detail_view_returns_200(self):
-        ds = Divesite.objects.all()[0]
-        result = self.client.get(reverse('divesite-detail', args=[ds.id]))
         self.assertEqual(result.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(result.data), NUM_SITES)
 
     def test_detail_view_returns_expected_fields(self):
         ds = Divesite.objects.all()[0]
-        data = self.client.get(reverse('divesite-detail', args=[ds.id])).data
+        result = self.client.get(reverse('divesite-detail', args=[ds.id]))
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
+        data = result.data
         self.assertEqual(data['name'], ds.name)
         self.assertEqual(data['id'], str(ds.id))
         self.assertEqual(data['owner']['id'], ds.owner.profile.id)
@@ -59,24 +53,17 @@ class DivesiteCreateTestCase(APITestCase):
                 }
         self.url = reverse('divesite-list')
 
-    def test_unauthenticated_create_returns_401(self):
-        result = self.client.post(reverse('divesite-list'), self.data)
-        self.assertEqual(result.status_code, status.HTTP_401_UNAUTHORIZED)
-
     def test_unauthenticated_create_doesnt_create_a_divesite(self):
         count = Divesite.objects.count()
         result = self.client.post(reverse('divesite-list'), self.data)
+        self.assertEqual(result.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(count, Divesite.objects.count())
-
-    def test_authenticated_create_returns_201(self):
-        self.client.force_authenticate(self.u)
-        result = self.client.post(reverse('divesite-list'), self.data)
-        self.assertEqual(result.status_code, status.HTTP_201_CREATED)
 
     def test_authenticated_create_adds_a_divesite(self):
         count = Divesite.objects.count()
         self.client.force_authenticate(self.u)
         result = self.client.post(reverse('divesite-list'), self.data)
+        self.assertEqual(result.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Divesite.objects.count(), count + 1)
         self.assertTrue(Divesite.objects.filter(name=self.data['name']).exists())
 
@@ -104,9 +91,11 @@ class DivesiteUpdateTestCase(APITestCase):
         self.url = reverse('divesite-detail', args=[self.ds.id])
 
     def test_unauthenticated_update_returns_401(self):
+        old_name = self.ds.name
         data = {'name': 'New Divesite Name'}
         result = self.client.patch(reverse('divesite-detail', args=[self.ds.id]), data)
         self.assertEqual(result.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(Divesite.objects.get(id=self.ds.id).name, old_name)
 
     def test_divesite_owner_can_update(self):
         data = {'name': 'New Divesite Name'}
@@ -145,47 +134,56 @@ class DivesiteUpdateTestCase(APITestCase):
         self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class DiveSafeViewsTestCase(APITestCase):
+class DiveCustomViewsTestCase(APITestCase):
 
     def setUp(self):
         self.ds0, self.ds1 = factories.DivesiteFactory(), factories.DivesiteFactory()
         for _ in xrange(NUM_DIVES):
             d = factories.DiveFactory(divesite=self.ds0)
+        self.related_dives_url_0 = reverse('divesite-dives', args=[self.ds0.id])
+        self.related_dives_url_1 = reverse('divesite-dives', args=[self.ds1.id])
+        self.recent_dives_url_0 = reverse('divesite-recent-dives', args=[self.ds0.id])
+        self.recent_dives_url_1 = reverse('divesite-recent-dives', args=[self.ds1.id])
 
-    def test_list_of_related_dives_returns_200(self):
+    def test_get_list_of_related_dives_returns_list(self):
         result = self.client.get(reverse('divesite-dives', args=[self.ds0.id]))
         self.assertEqual(result.status_code, status.HTTP_200_OK)
-
-    def test_list_of_related_dives_returns_list(self):
-        result = self.client.get(reverse('divesite-dives', args=[self.ds0.id]))
         self.assertIsInstance(result.data, list)
         self.assertEqual(len(result.data), NUM_DIVES)
 
-    def test_list_of_related_dives_returns_200_if_empty(self):
+    def test_get_list_of_related_dives_returns_empty_list_if_no_dives(self):
         result = self.client.get(reverse('divesite-dives', args=[self.ds1.id]))
         self.assertEqual(result.status_code, status.HTTP_200_OK)
-
-    def test_list_of_related_dives_returns_empty_list(self):
-        result = self.client.get(reverse('divesite-dives', args=[self.ds1.id]))
         self.assertIsInstance(result.data, list)
         self.assertEqual(len(result.data), 0)
 
-    def test_detail_view_returns_200(self):
-        d = Dive.objects.all()[0]
-        result = self.client.get(reverse('dive-detail', args=[d.id]))
-        self.assertEqual(result.status_code, status.HTTP_200_OK)
+    def test_post_to_related_dives_returns_405(self):
+        user = UserFactory()
+        self.client.force_authenticate(user)
+        data = {
+                'depth': faker.random_int(min=1, max=100),
+                'duration': faker.random_int(min=1, max=100),
+                'start_time': faker.date_time_this_year(),
+                'divesite': self.ds0.id
+                }
+        result = self.client.post(self.related_dives_url_0, data)
+        self.assertEqual(result.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_detail_view_returns_expected_item(self):
-        d = Dive.objects.all()[0]
-        result = self.client.get(reverse('dive-detail', args=[d.id]))
-        self.assertEqual(result.data['diver']['id'], d.diver.profile.id)
+    def test_get_list_of_recent_dives_returns_list(self):
+        result = self.client.get(self.recent_dives_url_0)
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(result.data, list)
+
+    def test_get_list_of_recent_dives_returns_empty_list_if_no_dives(self):
+        result = self.client.get(self.recent_dives_url_1)
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(result.data, list)
 
 
 class DiveCreateTestCase(APITestCase):
 
     def setUp(self):
         self.user = UserFactory()
-        #self.d = DiveFactory(diver=self.user)
         self.ds = DivesiteFactory()
         self.data = {
                 'depth': faker.random_int(min=1, max=100),
@@ -252,7 +250,6 @@ class DiveUpdateTestCase(APITestCase):
         self.assertEqual(result.status_code, status.HTTP_200_OK)
         self.assertEqual(Dive.objects.get(id=self.dive.id).comment, new_text)
 
-
     def test_divesite_can_be_edited(self):
         data = {'divesite': self.ds.id}
         self.client.force_authenticate(self.user)
@@ -304,6 +301,6 @@ class DiveUpdateTestCase(APITestCase):
         data = {'diver': user2.profile}
         self.client.force_authenticate(user=self.user)
         result = self.client.patch(self.url, data)
-        # TODO: view should throw exception instead of returning 200
+        # TODO: view should probably throw exception instead of returning 200
         self.assertEqual(Dive.objects.get(id=self.dive.id).diver, self.user)
 
