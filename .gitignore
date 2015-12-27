@@ -2,3 +2,5 @@
 *.py[co]
 db.sqlite3
 .env
+.coverage
+htmlcov/
