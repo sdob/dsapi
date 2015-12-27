@@ -7,7 +7,6 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from dsapi.settings import AUTH_USER_MODEL
-import numpy as np
 from .validators import validate_duration, validate_latitude, validate_longitude
 
 class Divesite(models.Model):
@@ -27,7 +26,8 @@ class Divesite(models.Model):
     # return 0 as a default if nobody's logged a dive here.
     def get_average_maximum_depth(self):
         if self.dives.all():
-            return np.mean([_.depth for _ in self.dives.all()])
+            dives = self.dives.all()
+            return sum([_.depth for _ in dives]) / len(dives)
         return 0
     # Images are sorted out separately; we'll just store a URL
     header_image_url = models.URLField(blank=True)
