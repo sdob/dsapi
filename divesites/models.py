@@ -8,18 +8,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from dsapi.settings import AUTH_USER_MODEL
 import numpy as np
-
-def validate_duration(value):
-    if value <= timedelta(seconds=0):
-        raise ValidationError('%s is not a valid duration' % value)
-
-def validate_latitude(value):
-    if not -90 <= value <= 90:
-        raise ValidationError('%s is not a valid latitude' % value)
-
-def validate_longitude(value):
-    if not -180 <= value <= 180:
-        raise ValidationError('%s is not a valid longitude' % value)
+from .validators import validate_duration, validate_latitude, validate_longitude
 
 class Divesite(models.Model):
 
@@ -75,10 +64,12 @@ class Dive(models.Model):
 
     def clean(self):
         # For now we'll be explicit about validating
+        # XXX: this logic is duplicated in the serializer. Need to think
+        # about how to abstract it.
         validate_duration(self.duration)
         if self.start_time + self.duration >= timezone.now():
             raise ValidationError(_('Dive must have taken place in the past'))
-        super(Dive, self).clean()
+        return super(Dive, self).clean()
 
     def save(self, *args, **kwargs):
         self.clean()

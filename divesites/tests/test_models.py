@@ -54,7 +54,7 @@ class DiveModelTestCase(APITestCase):
     def test_start_time_in_the_future(self):
         try:
             d = factories.DiveFactory(start_time=timezone.now()+timedelta(seconds=1))
-            self.fail()
+            self.fail('Start time in the future should raise a ValidationError')
         except ValidationError:
             pass
 
@@ -63,7 +63,7 @@ class DiveModelTestCase(APITestCase):
             start_time = timezone.now() + timedelta(minutes=-30)
             duration = timedelta(minutes=60)
             d = factories.DiveFactory(start_time=start_time, duration=duration)
-            self.fail()
+            self.fail('Start time + duration ending in the future should raise a ValidationError')
         except ValidationError:
             pass
 

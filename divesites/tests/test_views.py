@@ -1,5 +1,7 @@
+from django.utils import timezone
 from datetime import timedelta
 import random
+from django.utils import timezone
 from django.core.urlresolvers import reverse
 import factory
 from faker import Factory as FakerFactory
@@ -87,6 +89,13 @@ class DivesiteUpdateTestCase(APITestCase):
         result = self.client.patch(reverse('divesite-detail', args=[self.ds.id]), data)
         self.assertEqual(result.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_divesite_owner_can_update(self):
+        data = {'name': 'New Divesite Name'}
+        self.client.force_authenticate(user=self.user)
+        result = self.client.patch(reverse('divesite-detail', args=[self.ds.id]), data)
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
+        self.assertEqual(Divesite.objects.get(id=self.ds.id).name, 'New Divesite Name')
+
     def test_only_divesite_owner_can_update(self):
         data = {'name': 'New Divesite Name'}
         user2 = UserFactory()
@@ -94,6 +103,15 @@ class DivesiteUpdateTestCase(APITestCase):
         self.assertFalse(user2 == self.ds.owner)
         result = self.client.patch(reverse('divesite-detail', args=[self.ds.id]), data)
         self.assertEqual(result.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_ownership_is_not_editable(self):
+        old_name = self.ds.name
+        new_name = 'New Divesite Name'
+        user2 = UserFactory()
+        data = {'owner': user2.profile}
+        self.client.force_authenticate(self.user)
+        result = self.client.patch(reverse('divesite-detail', args=[self.ds.id]), data)
+        self.assertEqual(Divesite.objects.get(id=self.ds.id).name, old_name)
 
 
 class DiveSafeViewsTestCase(APITestCase):
@@ -165,21 +183,86 @@ class DiveUpdateTestCase(APITestCase):
 
     def setUp(self):
         self.user = UserFactory()
-        self.dive = DiveFactory(diver=self.user)
+        self.ds = DivesiteFactory()
+        self.dive = DiveFactory(diver=self.user, divesite=self.ds)
         self.data = {'duration': timedelta(minutes=random.randint(1, 60))}
+        self.url = reverse('dive-detail', args=[self.dive.id])
 
     def test_unauthenticated_patch_fails(self):
-        result = self.client.patch(reverse('dive-detail', args=[self.dive.id]), self.data)
+        result = self.client.patch(self.url, self.data)
         self.assertEqual(result.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_dive_creator_can_update(self):
         self.client.force_authenticate(self.user)
-        result = self.client.patch(reverse('dive-detail', args=[self.dive.id]), self.data)
+        result = self.client.patch(self.url, self.data)
         self.assertEqual(result.status_code, status.HTTP_200_OK)
         self.assertEqual(Dive.objects.get(id=self.dive.id).duration, self.data['duration'])
 
     def test_only_dive_creator_can_update(self):
         user2 = UserFactory()
         self.client.force_authenticate(user2)
-        result = self.client.patch(reverse('dive-detail', args=[self.dive.id]), self.data)
+        result = self.client.patch(self.url, self.data)
         self.assertEqual(result.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_comment_can_be_edited(self):
+        new_text = faker.text()
+        data = {'comment': new_text}
+        self.client.force_authenticate(self.user)
+        result = self.client.patch(self.url, data)
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
+        self.assertEqual(Dive.objects.get(id=self.dive.id).comment, new_text)
+
+
+    def test_divesite_can_be_edited(self):
+        data = {'divesite': self.ds.id}
+        self.client.force_authenticate(self.user)
+        result = self.client.patch(self.url, data)
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
+
+    def test_start_time_can_be_edited_if_valid(self):
+        data = {'start_time': self.dive.start_time - timedelta(minutes=-1)}
+        self.client.force_authenticate(self.user)
+        result = self.client.patch(self.url, data)
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
+
+    def test_start_time_cannot_be_edited_if_invalid(self):
+        data = {'start_time': timezone.now() + timedelta(days=1)}
+        self.client.force_authenticate(self.user)
+        result = self.client.patch(self.url, data)
+        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_duration_can_be_edited_if_valid(self):
+        new_start_time =  timezone.now() - timedelta(hours=2) # valid start time
+        self.dive.start_time = new_start_time
+        self.dive.save()
+        self.assertEqual(Dive.objects.get(id=self.dive.id).start_time, new_start_time)
+        data = {'duration': timedelta(hours=1)} # duration is valid given start time
+        self.client.force_authenticate(user=self.user)
+        result = self.client.patch(self.url, data)
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
+
+    def test_duration_cannot_be_edited_if_invalid(self):
+        new_start_time =  timezone.now() - timedelta(hours=1) # valid start time
+        self.dive.start_time = new_start_time
+        self.dive.save()
+        self.assertEqual(Dive.objects.get(id=self.dive.id).start_time, new_start_time)
+        data = {'duration': timedelta(hours=2)} # duration is invalid given start time
+        self.client.force_authenticate(user=self.user)
+        result = self.client.patch(self.url, data)
+        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_depth_can_be_edited(self):
+        new_depth = self.dive.depth + 10
+        data = {'depth': new_depth}
+        self.client.force_authenticate(self.user)
+        result = self.client.patch(self.url, data)
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
+        self.assertEqual(Dive.objects.get(id=self.dive.id).depth, new_depth)
+
+    def test_diver_cannot_be_changed(self):
+        user2 = UserFactory()
+        data = {'diver': user2.profile}
+        self.client.force_authenticate(user=self.user)
+        result = self.client.patch(self.url, data)
+        # TODO: view should throw exception instead of returning 200
+        self.assertEqual(Dive.objects.get(id=self.dive.id).diver, self.user)
