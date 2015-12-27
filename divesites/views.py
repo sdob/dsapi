@@ -44,13 +44,6 @@ class DiveViewSet(viewsets.ModelViewSet):
     queryset = Dive.objects.all()
     serializer_class = DiveSerializer
 
-    from django.views.defaults import bad_request
-    def create(self, request, *args, **kwargs):
-        try:
-            return super(viewsets.ModelViewSet, self).create(request, *args, **kwargs)
-        except ValidationError:
-            return bad_request(request)
-
     def perform_create(self, serializer):
         # Unless we explicitly set the divesite ID here, we get an IntegrityError (?)
         serializer.save(diver=self.request.user, divesite=Divesite.objects.get(id=self.request.data['divesite']))
