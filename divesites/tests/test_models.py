@@ -36,6 +36,13 @@ class DivesiteModelTestCase(APITestCase):
             factories.DiveFactory(depth=1, divesite=ds)
         self.assertEquals(ds.get_average_maximum_depth(), 1)
 
+    def test_get_average_duration_returns_expected_result(self):
+        ds = factories.DivesiteFactory()
+        for _ in xrange(10):
+            factories.DiveFactory(divesite=ds, duration=timedelta(seconds=120))
+        self.assertEquals(Divesite.objects.get(id=ds.id).get_average_duration(), 2.0)
+        self.assertEquals(factories.DivesiteFactory().get_average_duration(), 0)
+
 
 class DiveModelTestCase(APITestCase):
 

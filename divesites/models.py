@@ -29,6 +29,12 @@ class Divesite(models.Model):
             dives = self.dives.all()
             return sum([_.depth for _ in dives]) / len(dives)
         return 0
+    def get_average_duration(self):
+        """Return average duration, in minutes"""
+        if self.dives.all():
+            dives = self.dives.all()
+            return  sum([_.duration.total_seconds() for _ in dives]) // (60 * len(dives))
+        return 0
     # Images are sorted out separately; we'll just store a URL
     header_image_url = models.URLField(blank=True)
     # Geographical coordinates

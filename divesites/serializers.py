@@ -87,11 +87,14 @@ class DivesiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Divesite
         depth = 1
-        fields = ('owner', 'depth', 'dives', 'name', 'id', 'latitude', 'longitude', 'level', 'boat_entry', 'shore_entry','dives', )
+        fields = ('owner', 'depth', 'duration', 'dives', 'name', 'id', 'latitude', 'longitude', 'level', 'boat_entry', 'shore_entry','dives', )
         validators = [
                 DivesiteDistanceValidator(queryset=Divesite.objects.all())
                 ]
+
+    dives = DiveSerializer(many=True, read_only=True)
     depth = serializers.ReadOnlyField(source='get_average_maximum_depth')
+    duration = serializers.ReadOnlyField(source="get_average_duration")
     owner = ProfileSerializer(source='owner.profile', read_only=True)
 
     def validate(self, attrs):
