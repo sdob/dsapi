@@ -43,6 +43,6 @@ class ProfileViewSet(viewsets.GenericViewSet,
         queryset = Profile.objects.all()
         max_items = 10
         profile = get_object_or_404(queryset, pk=pk)
-        activities = Activity.objects.filter(user=profile.user).select_subclasses()[:max_items]
+        activities = Activity.objects.filter(user=profile.user).order_by('-creation_date').select_subclasses()[:max_items]
         data = [activity.serializers.serializer_factory(_)(_).data for _ in activities]
         return Response(data)
