@@ -40,11 +40,8 @@ class ProfileSaveViewsTestCase(APITestCase):
         self.assertEqual(len(response.data), 3)
 
     def test_listing_profiles_is_undefined(self):
-        try:
+        with self.assertRaises(NoReverseMatch):
             self.client.get(reverse('profile-list', args=[self.p.id]))
-            fail('reversing "profile-list" should raise a NoReverseMatch exception')
-        except NoReverseMatch:
-            pass
 
 
 class ProfileCreateTestCase(APITestCase):
@@ -56,11 +53,8 @@ class ProfileCreateTestCase(APITestCase):
         self.p = user.profile
 
     def test_creating_profiles_is_undefined(self):
-        try:
+        with self.assertRaises(NoReverseMatch):
             self.client.post(reverse('profile-list', args=[self.p.id]))
-            fail('reversing "profile-list" should raise a NoReverseMatch exception')
-        except NoReverseMatch:
-            pass
 
 
 class ProfileDeleteTestCase(APITestCase):
@@ -72,11 +66,8 @@ class ProfileDeleteTestCase(APITestCase):
         self.p = user.profile
 
     def test_creating_profiles_is_undefined(self):
-        try:
+        with self.assertRaises(NoReverseMatch):
             self.client.delete(reverse('profile-list', args=[self.p.id]))
-            fail('reversing "profile-list" should raise a NoReverseMatch exception')
-        except NoReverseMatch:
-            pass
 
 
 class ProfileUpdateTestCase(APITestCase):

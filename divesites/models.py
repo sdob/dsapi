@@ -7,19 +7,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from dsapi.settings import AUTH_USER_MODEL
-import numpy as np
-
-def validate_duration(value):
-    if value <= timedelta(seconds=0):
-        raise ValidationError('%s is not a valid duration' % value)
-
-def validate_latitude(value):
-    if not -90 <= value <= 90:
-        raise ValidationError('%s is not a valid latitude' % value)
-
-def validate_longitude(value):
-    if not -180 <= value <= 180:
-        raise ValidationError('%s is not a valid longitude' % value)
+from .validators import validate_duration, validate_latitude, validate_longitude
 
 class Divesite(models.Model):
 
@@ -38,7 +26,14 @@ class Divesite(models.Model):
     # return 0 as a default if nobody's logged a dive here.
     def get_average_maximum_depth(self):
         if self.dives.all():
-            return np.mean([_.depth for _ in self.dives.all()])
+            dives = self.dives.all()
+            return sum([_.depth for _ in dives]) / len(dives)
+        return 0
+    def get_average_duration(self):
+        """Return average duration, in minutes"""
+        if self.dives.all():
+            dives = self.dives.all()
+            return  sum([_.duration.total_seconds() for _ in dives]) // (60 * len(dives))
         return 0
     # Images are sorted out separately; we'll just store a URL
     header_image_url = models.URLField(blank=True)
@@ -48,9 +43,6 @@ class Divesite(models.Model):
     # Creation metadata
     owner = models.ForeignKey(AUTH_USER_MODEL, related_name="divesites")
     creation_date = models.DateTimeField(auto_now_add=True)
-
-    def _get_profile(self):
-        return self.owner.profile
 
     def clean(self):
         validate_latitude(self.latitude)
@@ -76,15 +68,14 @@ class Dive(models.Model):
     # Creation metadata
     creation_date = models.DateTimeField(auto_now_add=True)
 
-    def _get_profile(self):
-        return self.diver.profile
-
     def clean(self):
         # For now we'll be explicit about validating
+        # XXX: this logic is duplicated in the serializer. Need to think
+        # about how to abstract it.
         validate_duration(self.duration)
         if self.start_time + self.duration >= timezone.now():
             raise ValidationError(_('Dive must have taken place in the past'))
-        super(Dive, self).clean()
+        return super(Dive, self).clean()
 
     def save(self, *args, **kwargs):
         self.clean()

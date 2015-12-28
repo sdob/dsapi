@@ -1,3 +1,5 @@
+from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -5,7 +7,8 @@ from rest_framework.response import Response
 from .serializers import DiveSerializer, DivesiteSerializer
 from .models import Dive, Divesite
 from .permissions import IsDiverOrReadOnly, IsOwnerOrReadOnly
-
+from activity.models import DiveLog
+from activity.serializers import DiveLogSerializer
 
 class DivesiteViewSet(viewsets.ModelViewSet):
 
@@ -22,6 +25,17 @@ class DivesiteViewSet(viewsets.ModelViewSet):
         dives = Dive.objects.filter(divesite=divesite)
         serializer = DiveSerializer(dives, many=True)
         return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def recent_dives(self, request, pk):
+        queryset = Divesite.objects.all()
+        max_items = 10
+        divesite = get_object_or_404(queryset, pk=pk)
+        dive_logs = DiveLog.objects.filter(dive__divesite=divesite).order_by('-creation_date')[:max_items]
+        serializer = DiveLogSerializer(dive_logs, many=True)
+        return Response(serializer.data)
+        #activities = Activity.objects.filter(divesite=divesite).select_subclasses()[:max_items]
+        #data = [activity.serializers.serializer_factory
 
 
 class DiveViewSet(viewsets.ModelViewSet):
