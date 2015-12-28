@@ -17,6 +17,7 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+from rest_framework.authtoken import views as authtoken_views
 from rest_framework.routers import DefaultRouter
 import divesites.views
 import profiles.views
@@ -28,5 +29,6 @@ router.register(r'users', profiles.views.ProfileViewSet)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^api-token-auth/', authtoken_views.obtain_auth_token, name='auth-endpoint'),
     url(r'^', include(router.urls))
 ]

@@ -3,7 +3,10 @@ from __future__ import unicode_literals
 import uuid
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
 from profiles.models import Profile
 
 class UserManager(BaseUserManager):
@@ -31,7 +34,6 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
-
     date_joined = models.DateTimeField(default=timezone.now)
     email = models.EmailField(unique=True)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -40,3 +42,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     pass
 
+# Post-save signal to ensure that a token is generated when  a User is
+# created.
+@receiver(post_save, sender=User)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
