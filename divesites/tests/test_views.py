@@ -151,6 +151,20 @@ class DivesiteUpdateTestCase(APITestCase):
         result = self.client.patch(self.url, data)
         self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_header_image_url_can_be_edited(self):
+        self.client.force_authenticate(self.user)
+        new_url = 'http://cloudinary.com/%s.jpg' % faker.word()
+        data = {'header_image_url': new_url}
+        result = self.client.patch(self.url, data)
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
+        self.assertEqual(Divesite.objects.get(id=self.ds.id).header_image_url, new_url)
+
+    def test_header_image_url_must_be_from_cloudinary(self):
+        self.client.force_authenticate(self.user)
+        new_url = 'http://%s/%s.jpg' % (faker.domain_name(), faker.word())
+        data = {'header_image_url': new_url}
+        result = self.client.patch(self.url, data)
+        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
 
 class DiveCustomViewsTestCase(APITestCase):
 

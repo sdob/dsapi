@@ -4,7 +4,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from .serializers import DiveSerializer, DivesiteSerializer
+from .serializers import DiveSerializer, DivesiteSerializer, DivesiteListSerializer
 from .models import Dive, Divesite
 from .permissions import IsDiverOrReadOnly, IsOwnerOrReadOnly
 from activity.models import DiveLog
@@ -18,6 +18,12 @@ class DivesiteViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = DivesiteListSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     @detail_route(methods=['get'])
     def dives(self, request, pk):

@@ -1,4 +1,5 @@
 from datetime import timedelta
+from urlparse import urlparse
 from django.utils import timezone
 from rest_framework import serializers
 from profiles.serializers import ProfileSerializer
@@ -49,6 +50,7 @@ class DivesiteDistanceValidator(object):
             raise serializers.ValidationError('Too close to an existing divesite')
 
 
+
 class DiveSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Dive
@@ -82,12 +84,23 @@ class DiveSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class DivesiteListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Divesite
+        fields = ('id', 'depth', 'duration', 'level', 'boat_entry', 'shore_entry', 'latitude', 'longitude',)
+    depth = serializers.ReadOnlyField(source='get_average_maximum_depth')
+    duration = serializers.ReadOnlyField(source='get_average_duration')
+
+
 class DivesiteSerializer(serializers.ModelSerializer):
     """Serialize everything we know about a Divesite."""
     class Meta:
         model = models.Divesite
         depth = 1
-        fields = ('owner', 'depth', 'duration', 'dives', 'name', 'id', 'latitude', 'longitude', 'level', 'boat_entry', 'shore_entry','dives', )
+        fields = ('owner', 'depth', 'duration', 'dives', 'name', 'id',
+                'latitude', 'longitude', 'level', 'boat_entry', 'shore_entry','dives',
+                'header_image_url',
+                )
         validators = [
                 DivesiteDistanceValidator(queryset=Divesite.objects.all())
                 ]
@@ -96,6 +109,26 @@ class DivesiteSerializer(serializers.ModelSerializer):
     depth = serializers.ReadOnlyField(source='get_average_maximum_depth')
     duration = serializers.ReadOnlyField(source="get_average_duration")
     owner = ProfileSerializer(source='owner.profile', read_only=True)
+    header_image_url = serializers.URLField(required=False)
+
+    def get_validation_exclusions(self):
+        exclusions = super(DivesiteSerializer, self).get_validation_exclusions()
+        return exclusions + ['header_image_url']
+
+    # TODO: check
+    # http://www.django-rest-framework.org/api-guide/serializers/#field-level-validation
+    # and work out how to name this validate_header_image_url without it barfing.
+    def validate_header_image(self, attrs):
+        if 'header_image_url' in attrs.keys():
+            url = attrs['header_image_url']
+            if url == '':
+                return
+            if urlparse(url).netloc.split('.')[-2:] != ['cloudinary', 'com']:
+                raise serializers.ValidationError('Invalid image URL')
+
+    #def validate_header_image_url(self, attrs):
+        #if not attrs:
+            #return
 
     def validate(self, attrs):
         if 'boat_entry' in attrs.keys():
@@ -110,4 +143,6 @@ class DivesiteSerializer(serializers.ModelSerializer):
         # otherwise the site is inaccessible
         if not (boat_entry or shore_entry):
             raise serializers.ValidationError('either boat_entry or shore_entry must be true')
+        self.validate_header_image(attrs)
         return attrs
+

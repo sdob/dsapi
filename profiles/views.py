@@ -1,9 +1,9 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework import mixins
 from rest_framework import viewsets
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import api_view, detail_route, list_route, permission_classes
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from .models import Profile
 from .permissions import IsProfileOwnerOrReadOnly
 from .serializers import ProfileSerializer
@@ -20,6 +20,14 @@ class ProfileViewSet(viewsets.GenericViewSet,
     permission_classes = (IsAuthenticatedOrReadOnly, IsProfileOwnerOrReadOnly)
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+
+    @list_route(methods=['get'], permission_classes=[IsAuthenticated])
+    #@list_route(methods=['get'])
+    def me(self, request):
+        print dir(request)
+        print request.user.profile
+        serializer = ProfileSerializer(request.user.profile)
+        return Response(serializer.data)
 
     @detail_route(methods=['get'])
     def dives(self, request, pk):

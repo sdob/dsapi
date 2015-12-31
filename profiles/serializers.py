@@ -25,6 +25,11 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         #fields = ('id', 'name', 'dives',)
+        #fields = ('ids', 'name', 'dives', 'divesites', 'date_joined', 'hours_underwater',)
     dives = UnattributedDiveSerializer(source='user.dives', many=True, read_only=True)
     divesites = UnattributedDivesiteSerializer(source='user.divesites', many=True, read_only=True)
     date_joined = serializers.ReadOnlyField(source='user.date_joined', read_only=True)
+    hours_underwater = serializers.ReadOnlyField(source='get_hours_underwater')
+    divesites_visited = serializers.ReadOnlyField(source='get_number_of_divesites_visited');
+    dives_in_last_365_days = serializers.ReadOnlyField(source='count_dives_in_last_365_days');
+    dives_in_last_90_days = serializers.ReadOnlyField(source='count_dives_in_last_90_days');
