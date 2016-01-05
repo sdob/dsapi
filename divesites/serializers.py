@@ -109,7 +109,7 @@ class DivesiteSerializer(serializers.ModelSerializer):
     depth = serializers.ReadOnlyField(source='get_average_maximum_depth')
     duration = serializers.ReadOnlyField(source="get_average_duration")
     owner = ProfileSerializer(source='owner.profile', read_only=True)
-    header_image_url = serializers.URLField(required=False)
+    header_image_url = serializers.URLField(required=False, allow_blank=True)
 
     def get_validation_exclusions(self):
         exclusions = super(DivesiteSerializer, self).get_validation_exclusions()
