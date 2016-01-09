@@ -35,7 +35,7 @@ class DiveFactory(factory.DjangoModelFactory):
     @factory.lazy_attribute
     def start_time(self):
         # TODO: ensure that by default this is at least one day before today
-        dt = faker.date_time_this_year(before_now=True, after_now=False)
+        dt = faker.date_time_this_year(before_now=True, after_now=False) - timedelta(days=2)
         tz = timezone.get_default_timezone()
         aware = timezone.make_aware(dt, tz)
         return aware
