@@ -6,7 +6,7 @@ class UnattributedDivesiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Divesite
         fields = ('id', 'name', 'description',
-                'boat_entry', 'shore_entry', 'level', 'header_image_url',
+                'boat_entry', 'shore_entry', 'level',
                 'latitude', 'longitude',)
 
 class UnattributedDiveSerializer(serializers.ModelSerializer):
@@ -19,6 +19,11 @@ class UnattributedDiveSerializer(serializers.ModelSerializer):
         model = Dive
         fields = ('id', 'depth', 'duration', 'comment', 'start_time', 'divesite',)
     divesite = UnattributedDivesiteSerializer()
+
+class MinimalProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ('id', 'name',)
 
 
 class ProfileSerializer(serializers.ModelSerializer):

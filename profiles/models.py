@@ -12,8 +12,6 @@ class Profile(models.Model):
     user = models.OneToOneField(User)
     # The user's name
     name = models.CharField(max_length=200)
-    # The user's profile image URL
-    profile_image_url = models.URLField(blank=True)
     # Some stats
     def get_hours_underwater(self):
         return sum([_.duration.total_seconds() for _ in self.user.dives.all()]) // (3600)
