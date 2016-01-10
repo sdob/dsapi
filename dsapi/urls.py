@@ -24,8 +24,10 @@ import myauth.views
 import profiles.views
 
 router = DefaultRouter()
+router.register(r'compressors', divesites.views.CompressorViewSet)
 router.register(r'divesites', divesites.views.DivesiteViewSet)
 router.register(r'dives', divesites.views.DiveViewSet)
+router.register(r'slipways', divesites.views.SlipwayViewSet)
 router.register(r'users', profiles.views.ProfileViewSet)
 
 urlpatterns = [

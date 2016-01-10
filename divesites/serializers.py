@@ -132,3 +132,14 @@ class DivesiteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('either boat_entry or shore_entry must be true')
         return attrs
 
+
+class CompressorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Compressor
+    owner = ProfileSerializer(source='owner.profile', read_only=True)
+
+
+class SlipwaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Slipway
+    owner = ProfileSerializer(source='owner.profile', read_only=True)

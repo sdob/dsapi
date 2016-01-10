@@ -43,3 +43,25 @@ class DiveFactory(factory.DjangoModelFactory):
     def duration(self):
         seconds = random.randint(1, 60) * 60
         return timedelta(seconds=seconds)
+
+
+class CompressorFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Compressor
+
+    name = factory.Sequence(lambda n: 'Slipway {0}'.format(n))
+    latitude = factory.Faker('latitude')
+    longitude = factory.Faker('longitude')
+    owner = factory.SubFactory(UserFactory)
+    description = factory.Faker('text')
+
+
+class SlipwayFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Slipway
+
+    name = factory.Sequence(lambda n: 'Slipway {0}'.format(n))
+    latitude = factory.Faker('latitude')
+    longitude = factory.Faker('longitude')
+    owner = factory.SubFactory(UserFactory)
+    description = factory.Faker('text')

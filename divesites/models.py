@@ -78,3 +78,26 @@ class Dive(models.Model):
     def save(self, *args, **kwargs):
         self.clean()
         super(Dive, self).save(*args, **kwargs)
+
+
+class Compressor(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    # Geographical coordinates
+    latitude = models.DecimalField(max_digits=10, decimal_places=7, validators=[validate_latitude])
+    longitude = models.DecimalField(max_digits=10, decimal_places=7, validators=[validate_longitude])
+    # Creation metadata
+    owner = models.ForeignKey(AUTH_USER_MODEL, related_name='compressors')
+    creation_data = models.DateTimeField(auto_now_add=True)
+
+class Slipway(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    # Geographical coordinates
+    latitude = models.DecimalField(max_digits=10, decimal_places=7, validators=[validate_latitude])
+    longitude = models.DecimalField(max_digits=10, decimal_places=7, validators=[validate_longitude])
+    # Creation metadata
+    owner = models.ForeignKey(AUTH_USER_MODEL, related_name='slipways')
+    creation_data = models.DateTimeField(auto_now_add=True)

@@ -4,8 +4,8 @@ from rest_framework import viewsets
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from .serializers import DiveSerializer, DivesiteSerializer, DivesiteListSerializer
-from .models import Dive, Divesite
+from .serializers import CompressorSerializer, DiveSerializer, DivesiteSerializer, DivesiteListSerializer, SlipwaySerializer
+from .models import Compressor, Dive, Divesite, Slipway
 from .permissions import IsDiverOrReadOnly, IsOwnerOrReadOnly
 from activity.models import DiveLog
 from activity.serializers import DiveLogSerializer
@@ -53,3 +53,15 @@ class DiveViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Unless we explicitly set the divesite ID here, we get an IntegrityError (?)
         serializer.save(diver=self.request.user, divesite=Divesite.objects.get(id=self.request.data['divesite']))
+
+
+class CompressorViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
+    queryset = Compressor.objects.all()
+    serializer_class = CompressorSerializer
+
+
+class SlipwayViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
+    queryset = Slipway.objects.all()
+    serializer_class = SlipwaySerializer
