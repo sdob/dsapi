@@ -85,9 +85,13 @@ WSGI_APPLICATION = 'dsapi.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
+# Parse db configuration from $DATABASE_URL
 DATABASES = {
         'default': dj_database_url.config()
 }
+
+# Enable persistent connections
+DATABASES['default']['CONN_MAX_AGE'] = 500
 
 
 # Password validation
