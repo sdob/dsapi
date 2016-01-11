@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
+from haversine import haversine
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -42,6 +43,32 @@ class DivesiteViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
         #activities = Activity.objects.filter(divesite=divesite).select_subclasses()[:max_items]
         #data = [activity.serializers.serializer_factory
+
+    @detail_route(methods=['get'])
+    def nearby_slipways(self, request, pk):
+        # XXX: this is going to hit the DB for *all* slipways, then
+        # sort them on haversine, then return the top n results.
+        # In other words, it's an expensive query.
+        # With GeoDjango there's probably a better way to do it,
+        # but that'll require SaaS support for GeoDjango
+        divesite = get_object_or_404(self.get_queryset(), pk=pk)
+        slipways = Slipway.objects.all()
+        # Sort the slipways on Haversine distance from this
+        # divesite
+        key = lambda slipway: haversine(
+                (divesite.latitude, divesite.longitude),
+                (slipway.latitude, slipway.longitude)
+                )
+        slipways = [slipway for slipway in sorted(slipways, key=key) \
+                if haversine(
+                (divesite.latitude, divesite.longitude),
+                (slipway.latitude, slipway.longitude)
+                    ) <= 5000]
+        print "returning Slipways: %d" % len(slipways)
+        # TODO: sort on Haversine distance
+        serializer = SlipwaySerializer(slipways, many=True)
+        print serializer.data
+        return Response(serializer.data)
 
 
 class DiveViewSet(viewsets.ModelViewSet):

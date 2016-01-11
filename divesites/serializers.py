@@ -1,5 +1,6 @@
 from datetime import timedelta
 from urlparse import urlparse
+import haversine
 from django.utils import timezone
 from rest_framework import serializers
 from profiles.serializers import MinimalProfileSerializer, ProfileSerializer
@@ -107,6 +108,7 @@ class DivesiteSerializer(serializers.ModelSerializer):
         depth = 1
         fields = ('owner', 'depth', 'duration', 'dives', 'name', 'id',
                 'latitude', 'longitude', 'level', 'boat_entry', 'shore_entry','dives',
+                'description',
                 )
         validators = [
                 DivesiteDistanceValidator(queryset=Divesite.objects.all())
@@ -136,10 +138,10 @@ class DivesiteSerializer(serializers.ModelSerializer):
 class CompressorSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Compressor
-    owner = ProfileSerializer(source='owner.profile', read_only=True)
+    owner = MinimalProfileSerializer(source='owner.profile', read_only=True)
 
 
 class SlipwaySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Slipway
-    owner = ProfileSerializer(source='owner.profile', read_only=True)
+    owner = MinimalProfileSerializer(source='owner.profile', read_only=True)
