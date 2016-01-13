@@ -87,8 +87,16 @@ class CompressorViewSet(viewsets.ModelViewSet):
     queryset = Compressor.objects.all()
     serializer_class = CompressorSerializer
 
+    def perform_create(self, serializer):
+        # Set the owner
+        serializer.save(owner=self.request.user)
+
 
 class SlipwayViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
     queryset = Slipway.objects.all()
     serializer_class = SlipwaySerializer
+
+    def perform_create(self, serializer):
+        # Set the owner
+        serializer.save(owner=self.request.user)
