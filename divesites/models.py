@@ -36,8 +36,8 @@ class Divesite(models.Model):
             return  sum([_.duration.total_seconds() for _ in dives]) // (60 * len(dives))
         return 0
     # Geographical coordinates
-    latitude = models.DecimalField(max_digits=10, decimal_places=7, validators=[validate_latitude])
-    longitude = models.DecimalField(max_digits=10, decimal_places=7, validators=[validate_longitude])
+    latitude = models.DecimalField(max_digits=15, decimal_places=12, validators=[validate_latitude])
+    longitude = models.DecimalField(max_digits=15, decimal_places=12, validators=[validate_longitude])
     # Creation metadata
     owner = models.ForeignKey(AUTH_USER_MODEL, related_name="divesites")
     creation_date = models.DateTimeField(auto_now_add=True)
@@ -85,8 +85,8 @@ class Compressor(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     # Geographical coordinates
-    latitude = models.DecimalField(max_digits=10, decimal_places=7, validators=[validate_latitude])
-    longitude = models.DecimalField(max_digits=10, decimal_places=7, validators=[validate_longitude])
+    latitude = models.DecimalField(max_digits=15, decimal_places=12, validators=[validate_latitude])
+    longitude = models.DecimalField(max_digits=15, decimal_places=12, validators=[validate_longitude])
     # Creation metadata
     owner = models.ForeignKey(AUTH_USER_MODEL, related_name='compressors')
     creation_data = models.DateTimeField(auto_now_add=True)
@@ -96,8 +96,8 @@ class Slipway(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     # Geographical coordinates
-    latitude = models.DecimalField(max_digits=10, decimal_places=7, validators=[validate_latitude])
-    longitude = models.DecimalField(max_digits=10, decimal_places=7, validators=[validate_longitude])
+    latitude = models.DecimalField(max_digits=15, decimal_places=12, validators=[validate_latitude])
+    longitude = models.DecimalField(max_digits=15, decimal_places=12, validators=[validate_longitude])
     # Creation metadata
     owner = models.ForeignKey(AUTH_USER_MODEL, related_name='slipways')
     creation_data = models.DateTimeField(auto_now_add=True)
