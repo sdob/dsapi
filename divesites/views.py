@@ -13,6 +13,8 @@ from activity.serializers import DiveLogSerializer
 
 class DivesiteViewSet(viewsets.ModelViewSet):
 
+    NEARBY_SLIPWAY_KM_LIMIT = 50
+
     permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
     queryset = Divesite.objects.all()
     serializer_class = DivesiteSerializer
@@ -63,7 +65,7 @@ class DivesiteViewSet(viewsets.ModelViewSet):
                 if haversine(
                 (divesite.latitude, divesite.longitude),
                 (slipway.latitude, slipway.longitude)
-                    ) <= 5000]
+                    ) <= NEARBY_SLIPWAY_KM_LIMIT]
         print "returning Slipways: %d" % len(slipways)
         # TODO: sort on Haversine distance
         serializer = SlipwaySerializer(slipways, many=True)
