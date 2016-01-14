@@ -13,7 +13,6 @@ from activity.serializers import DiveLogSerializer
 
 class DivesiteViewSet(viewsets.ModelViewSet):
 
-    NEARBY_SLIPWAY_KM_LIMIT = 50
 
     permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
     queryset = Divesite.objects.all()
@@ -48,6 +47,7 @@ class DivesiteViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['get'])
     def nearby_slipways(self, request, pk):
+        NEARBY_SLIPWAY_KM_LIMIT = 50
         # XXX: this is going to hit the DB for *all* slipways, then
         # sort them on haversine, then return the top n results.
         # In other words, it's an expensive query.
