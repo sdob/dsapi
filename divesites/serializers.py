@@ -117,7 +117,8 @@ class DivesiteSerializer(serializers.ModelSerializer):
     dives = DiveListSerializer(many=True, read_only=True)
     depth = serializers.ReadOnlyField(source='get_average_maximum_depth')
     duration = serializers.ReadOnlyField(source="get_average_duration")
-    owner = ProfileSerializer(source='owner.profile', read_only=True)
+    # When we're sending a divesite, we don't want to send a full serialized Profile instance
+    owner = MinimalProfileSerializer(source='owner.profile', read_only=True)
 
     def validate(self, attrs):
         if 'boat_entry' in attrs.keys():
