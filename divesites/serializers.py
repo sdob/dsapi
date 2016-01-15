@@ -65,7 +65,7 @@ class DiveSerializer(serializers.ModelSerializer):
         model = models.Dive
         depth = 1
         #'fields = ('diver', 'id', 'depth', 'duration', 'divesite',)
-    diver = ProfileSerializer(source='diver.profile', read_only=True)
+    diver = MinimalProfileSerializer(source='diver.profile', read_only=True)
 
     def validate(self, attrs):
         # If we're doing a partial update, then only one (or neither)

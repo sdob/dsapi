@@ -21,6 +21,7 @@ class UnattributedDiveSerializer(serializers.ModelSerializer):
     divesite = UnattributedDivesiteSerializer()
 
 class MinimalProfileSerializer(serializers.ModelSerializer):
+    # a Profile serializer that just provides ID and name fields
     class Meta:
         model = Profile
         fields = ('id', 'name',)
