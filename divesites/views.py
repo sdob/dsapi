@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from haversine import haversine
+from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -73,7 +74,12 @@ class DivesiteViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class DiveViewSet(viewsets.ModelViewSet):
+class DiveViewSet(viewsets.GenericViewSet,
+        # Don't mix in ListModelMixin: we don't want an API endpoint for it
+        mixins.CreateModelMixin,
+        mixins.RetrieveModelMixin,
+        mixins.UpdateModelMixin,
+        mixins.DestroyModelMixin):
 
     permission_classes = (IsAuthenticatedOrReadOnly,IsDiverOrReadOnly,)
     queryset = Dive.objects.all()
