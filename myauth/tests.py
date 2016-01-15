@@ -17,3 +17,21 @@ class TokenAuthenticationTestCase(APITestCase):
         self.assertEqual(result.status_code, status.HTTP_200_OK)
         self.assertIn('token', result.data.keys())
         self.assertEqual(result.data['token'], Token.objects.get(user=user).key)
+
+
+class UserRegistrationTestCase(APITestCase):
+
+    def test_registering_with_existing_email_fails(self):
+        email = 'testuser@example.com'
+        password = 'somevalidpass'
+        u = UserFactory(email=email)
+        data = {'email': email, 'password': password}
+        response = self.client.post(reverse('auth-register'), data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_registering_with_a_new_email_address_succeeds(self):
+        email = 'testuser@example.com'
+        password = 'somevalidpassword'
+        data = {'email': email, 'password': password}
+        response = self.client.post(reverse('auth-register'), data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)

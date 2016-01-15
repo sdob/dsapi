@@ -19,14 +19,17 @@ class ObtainAuthToken(ObtainAuthTokenBase):
 class CreateUserView(APIView):
 
     def post(self, request):
+        # Check whether a user exists with this email address
         if User.objects.filter(email=request.data['email']).exists():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
+        # Otherwise, create a user
         user = User.objects.create_user(
                 email=request.data['email'],
                 password=request.data['password']
                 )
+        # Respond with a token
         token = Token.objects.get(user=user)
-        return Response({'token': token.key, 'user': user.profile.id})
+        return Response({'token': token.key}, status=status.HTTP_201_CREATED)
 
 
 class CheckToken(APIView):
@@ -45,6 +48,6 @@ class CheckToken(APIView):
         except Profile.DoesNotExist:
             return default_bad_response
 
-create_user = CreateUserView.as_view()
+register = CreateUserView.as_view()
 check_token = CheckToken.as_view()
 obtain_auth_token = ObtainAuthToken.as_view()
