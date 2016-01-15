@@ -6,7 +6,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from .serializers import CompressorSerializer, DiveSerializer, DivesiteSerializer, DivesiteListSerializer, SlipwaySerializer
+from .serializers import CompressorSerializer, DiveSerializer, DiveListSerializer,  DivesiteSerializer, DivesiteListSerializer, SlipwaySerializer
 from .models import Compressor, Dive, Divesite, Slipway
 from .permissions import IsDiverOrReadOnly, IsOwnerOrReadOnly
 from activity.models import DiveLog
@@ -31,8 +31,10 @@ class DivesiteViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['get'])
     def dives(self, request, pk):
         divesite = self.get_object()
-        dives = Dive.objects.filter(divesite=divesite)
-        serializer = DiveSerializer(dives, many=True)
+        queryset = Dive.objects.filter(divesite=divesite)
+        # Use DiveListSerializer since we don't need more than a
+        # MinimalProfileSerializer and a primary key for the divesite
+        serializer = DiveListSerializer(queryset, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['get'])

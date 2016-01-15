@@ -51,20 +51,11 @@ class DivesiteDistanceValidator(object):
             raise serializers.ValidationError('Too close to an existing divesite')
 
 
-class DiveListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Dive
-    diver = MinimalProfileSerializer(source='diver.profile', read_only=True)
-    #diver = serializers.ReadOnlyField(source='diver.profile.id')
-    #diver = ProfileSerializer(source='diver.profile', read_only=True)
-    divesite = serializers.PrimaryKeyRelatedField(read_only=True)
-
-
 class DiveSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Dive
-        depth = 1
-        #'fields = ('diver', 'id', 'depth', 'duration', 'divesite',)
+        fields = ('comment', 'diver', 'id', 'depth', 'duration', 'divesite', 'start_time',)
+    # Provide at least ID and name attributes for the diver
     diver = MinimalProfileSerializer(source='diver.profile', read_only=True)
 
     def validate(self, attrs):
@@ -92,23 +83,22 @@ class DiveSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('dive must have ended in the past')
         return attrs
 
-
-class DivesiteListSerializer(serializers.ModelSerializer):
+class DiveListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Divesite
-        fields = ('id', 'depth', 'duration', 'level', 'boat_entry', 'shore_entry', 'latitude', 'longitude',)
-    depth = serializers.ReadOnlyField(source='get_average_maximum_depth')
-    duration = serializers.ReadOnlyField(source='get_average_duration')
+        model = models.Dive
+        fields = ('id', 'comment', 'depth', 'duration', 'start_time', 'divesite', 'diver',)
+    diver = MinimalProfileSerializer(source='diver.profile', read_only=True)
+    divesite = serializers.PrimaryKeyRelatedField(read_only=True)
 
 
 class DivesiteSerializer(serializers.ModelSerializer):
     """Serialize everything we know about a Divesite."""
     class Meta:
         model = models.Divesite
-        depth = 1
-        fields = ('owner', 'depth', 'duration', 'dives', 'name', 'id',
-                'latitude', 'longitude', 'level', 'boat_entry', 'shore_entry','dives',
+        fields = ('depth', 'duration', 'dives', 'name', 'id',
+                'latitude', 'longitude', 'level', 'boat_entry', 'shore_entry',
                 'description',
+                'owner',
                 )
         validators = [
                 DivesiteDistanceValidator(queryset=Divesite.objects.all())
@@ -135,6 +125,13 @@ class DivesiteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('either boat_entry or shore_entry must be true')
         return attrs
 
+
+class DivesiteListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Divesite
+        fields = ('id', 'depth', 'duration', 'level', 'boat_entry', 'shore_entry', 'latitude', 'longitude',)
+    depth = serializers.ReadOnlyField(source='get_average_maximum_depth')
+    duration = serializers.ReadOnlyField(source='get_average_duration')
 
 class CompressorSerializer(serializers.ModelSerializer):
     class Meta:

@@ -8,7 +8,7 @@ from .models import Profile
 from .permissions import IsProfileOwnerOrReadOnly
 from .serializers import ProfileSerializer
 from divesites.models import Dive, Divesite
-from divesites.serializers import DiveSerializer, DivesiteSerializer
+from divesites.serializers import DiveSerializer, DiveListSerializer, DivesiteSerializer
 from activity.models import Activity
 import activity.serializers
 
@@ -34,7 +34,7 @@ class ProfileViewSet(viewsets.GenericViewSet,
         queryset = Profile.objects.all()
         profile = get_object_or_404(queryset, pk=pk)
         dives = Dive.objects.filter(diver=profile.user)
-        s = DiveSerializer(dives, many=True)
+        s = DiveListSerializer(dives, many=True)
         return Response(s.data)
 
     @detail_route(methods=['get'])
