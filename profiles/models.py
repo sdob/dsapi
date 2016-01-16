@@ -8,6 +8,8 @@ from divesites.models import Dive
 
 # Create your models here.
 class Profile(models.Model):
+    def __str__(self):
+        return self.name
     # One-to-one mapping to an authentication User model
     user = models.OneToOneField(User)
     # The user's name
