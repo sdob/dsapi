@@ -32,7 +32,7 @@ router.register(r'users', profiles.views.ProfileViewSet)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^register/', myauth.views.register, name="auth-register"),
+    url(r'^auth/register', myauth.views.register, name='auth-register'),
     url(r'^api-token-auth/', authtoken_views.obtain_auth_token, name='auth-endpoint'),
     url(r'^api-token-check/', myauth.views.check_token, name='auth-checktoken'),
     url(r'^', include(router.urls))

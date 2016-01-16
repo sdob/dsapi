@@ -21,12 +21,21 @@ class CreateUserView(APIView):
     def post(self, request):
         # Check whether a user exists with this email address
         if User.objects.filter(email=request.data['email']).exists():
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                        data={
+                            'message': '"%s" is already registered.' % request.data['email']
+                            },
+                        status=status.HTTP_400_BAD_REQUEST
+                        )
         # Otherwise, create a user
         user = User.objects.create_user(
                 email=request.data['email'],
                 password=request.data['password']
                 )
+        if request.data.has_key('full_name'):
+            # Set the user's full name
+            user.profile.name = request.data['full_name']
+            user.profile.save()
         # Respond with a token
         token = Token.objects.get(user=user)
         return Response({'token': token.key}, status=status.HTTP_201_CREATED)

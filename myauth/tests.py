@@ -35,3 +35,13 @@ class UserRegistrationTestCase(APITestCase):
         data = {'email': email, 'password': password}
         response = self.client.post(reverse('auth-register'), data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(User.objects.filter(email=email).exists())
+
+    def test_full_name_is_added_to_profile(self):
+        email = 'testuser@example.com'
+        password = 'somevalidpassword'
+        full_name = 'Joe Bloggs'
+        data = {'email': email, 'password': password, 'full_name': full_name}
+        response = self.client.post(reverse('auth-register'), data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(User.objects.get(email=email).profile.name, full_name)
