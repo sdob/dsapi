@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
 
 import uuid
+import urllib2
 from datetime import timedelta
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from dsapi.settings import AUTH_USER_MODEL
+from dsapi.settings import AUTH_USER_MODEL, GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE
 from .validators import validate_duration, validate_latitude, validate_longitude
 
 class Divesite(models.Model):
@@ -41,6 +42,9 @@ class Divesite(models.Model):
     # Geographical coordinates
     latitude = models.DecimalField(max_digits=15, decimal_places=12, validators=[validate_latitude])
     longitude = models.DecimalField(max_digits=15, decimal_places=12, validators=[validate_longitude])
+    # Country and administrative-area data; we'll use the Google reverse-geocoding API to retrieve
+    # these (and store the JSON in a string in the db)
+    geocoding_data = models.TextField(blank=True)
     # Creation metadata
     owner = models.ForeignKey(AUTH_USER_MODEL, related_name="divesites")
     creation_date = models.DateTimeField(auto_now_add=True)
@@ -52,8 +56,18 @@ class Divesite(models.Model):
 
     def save(self, *args, **kwargs):
         self.clean()
+        # OK, so now the model is OK
+        try:
+            reverse_geocoding_json = urllib2.urlopen(GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE % (self.latitude, self.longitude)).read()
+            self.geocoding_data = reverse_geocoding_json
+            pass
+        except urllib2.URLError:
+            # TODO: handle URL errors
+            pass
+        except urllib2.HTTPError:
+            # TODO: Handle HTTP errors
+            pass
         super(Divesite, self).save(*args, **kwargs)
-
 
 class Dive(models.Model):
     class Meta:

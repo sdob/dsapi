@@ -99,6 +99,7 @@ class DivesiteSerializer(serializers.ModelSerializer):
                 'latitude', 'longitude', 'level', 'boat_entry', 'shore_entry',
                 'description',
                 'owner',
+                'geocoding_data',
                 )
         validators = [
                 DivesiteDistanceValidator(queryset=Divesite.objects.all())

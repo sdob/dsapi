@@ -140,3 +140,6 @@ REST_FRAMEWORK = {
 
 # XXX: for development only!
 CORS_ORIGIN_ALLOW_ALL = True
+
+# Google reverse-geocoding url template string
+GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=%s,%s'
