@@ -130,7 +130,7 @@ class DivesiteSerializer(serializers.ModelSerializer):
 class DivesiteListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Divesite
-        fields = ('id', 'depth', 'duration', 'level', 'boat_entry', 'shore_entry', 'latitude', 'longitude',)
+        fields = ('id', 'depth', 'duration', 'level', 'boat_entry', 'shore_entry', 'latitude', 'longitude','name',)
     depth = serializers.ReadOnlyField(source='get_average_maximum_depth')
     duration = serializers.ReadOnlyField(source='get_average_duration')
 
