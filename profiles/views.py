@@ -24,8 +24,6 @@ class ProfileViewSet(viewsets.GenericViewSet,
     @list_route(methods=['get'], permission_classes=[IsAuthenticated])
     #@list_route(methods=['get'])
     def me(self, request):
-        print dir(request)
-        print request.user.profile
         serializer = ProfileSerializer(request.user.profile)
         return Response(serializer.data)
 

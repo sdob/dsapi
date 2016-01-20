@@ -69,10 +69,8 @@ class DivesiteViewSet(viewsets.ModelViewSet):
                 (divesite.latitude, divesite.longitude),
                 (slipway.latitude, slipway.longitude)
                     ) <= NEARBY_SLIPWAY_KM_LIMIT]
-        print "returning Slipways: %d" % len(slipways)
         # TODO: sort on Haversine distance
         serializer = SlipwaySerializer(slipways, many=True)
-        print serializer.data
         return Response(serializer.data)
 
 
