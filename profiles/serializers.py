@@ -30,8 +30,6 @@ class MinimalProfileSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        #fields = ('id', 'name', 'dives',)
-        #fields = ('ids', 'name', 'dives', 'divesites', 'date_joined', 'hours_underwater',)
     dives = UnattributedDiveSerializer(source='user.dives', many=True, read_only=True)
     divesites = UnattributedDivesiteSerializer(source='user.divesites', many=True, read_only=True)
     date_joined = serializers.ReadOnlyField(source='user.date_joined', read_only=True)
