@@ -6,9 +6,20 @@ from django.utils import timezone
 from faker import Factory as FakerFactory
 from faker.generator import random
 from . import models
-from myauth.factories import UserFactory
+from django.contrib.auth.models import User
 
 faker = FakerFactory.create()
+
+class UserFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = User
+    username = factory.Faker('user_name')
+    password = factory.Faker('password')
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        manager = cls._get_manager(model_class)
+        return manager.create_user(*args, **kwargs)
 
 class DivesiteFactory(factory.DjangoModelFactory):
     class Meta:

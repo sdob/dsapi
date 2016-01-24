@@ -27,6 +27,21 @@ class MinimalProfileSerializer(serializers.ModelSerializer):
         fields = ('id', 'name',)
 
 
+class OwnProfileSerializer(serializers.ModelSerializer):
+    """This serializer exposes an email address and certain other personally-identifying information,
+    so use with care."""
+    class Meta:
+        model = Profile
+        exclude = ('user',)
+    email = serializers.EmailField(source='user.email', read_only=True)
+    dives = UnattributedDiveSerializer(source='user.dives', many=True, read_only=True)
+    divesites = UnattributedDivesiteSerializer(source='user.divesites', many=True, read_only=True)
+    date_joined = serializers.ReadOnlyField(source='user.date_joined', read_only=True)
+    hours_underwater = serializers.ReadOnlyField(source='get_hours_underwater')
+    divesites_visited = serializers.ReadOnlyField(source='get_number_of_divesites_visited');
+    dives_in_last_365_days = serializers.ReadOnlyField(source='count_dives_in_last_365_days');
+    dives_in_last_90_days = serializers.ReadOnlyField(source='count_dives_in_last_90_days');
+
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile

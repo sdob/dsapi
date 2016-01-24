@@ -28,9 +28,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-# Set custom user model
-AUTH_USER_MODEL = 'myauth.User'
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -38,15 +35,20 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders', # CORS headers for Django
-    'divesites', # Divesite and Dive models
-    'myauth', # custom User model
-    'profiles', # rich User profiles
-    'activity', # User activity
     'rest_framework', # REST API framework
     'rest_framework.authtoken', # Token-based authentication
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.google',
+    'divesites', # Divesite and Dive models
+    'profiles', # rich User profiles
+    'authviews', # social auth hookups
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -55,6 +57,7 @@ MIDDLEWARE_CLASSES = [
     'corsheaders.middleware.CorsMiddleware', # CORS middleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'corsheaders.middleware.CorsPostCsrfMiddleware', # CORS replace HTTPS referer
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -138,8 +141,34 @@ REST_FRAMEWORK = {
             )
         }
 
+AUTHENTICATION_BACKENDS = (
+        # Log in through Django admin
+        'django.contrib.auth.backends.ModelBackend',
+        # allauth-specific auth methods
+        'allauth.account.auth_backends.AuthenticationBackend',
+        )
+
+# CORS stuff
 # XXX: for development only!
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_REPLACE_HTTPS_REFERER = True
+
+CORS_ORIGIN_WHITELIST = (
+        'facebook.com',
+        'google.com',
+        'dsfe.herokuapp.com',
+        )
 
 # Google reverse-geocoding url template string
 GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=%s,%s'
+
+SITE_ID = 1
+
+# django-allauth stuff
+# Relax social account email verification configuration
+# see: https://github.com/Tivix/django-rest-auth/issues/23
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_EMAIL_REQUIRED = False
+SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+ACCOUNT_USERNAME_REQUIRED = False # could be the issue

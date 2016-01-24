@@ -9,8 +9,6 @@ from rest_framework.response import Response
 from .serializers import CompressorSerializer, DiveSerializer, DiveListSerializer,  DivesiteSerializer, DivesiteListSerializer, SlipwaySerializer
 from .models import Compressor, Dive, Divesite, Slipway
 from .permissions import IsDiverOrReadOnly, IsOwnerOrReadOnly
-from activity.models import DiveLog
-from activity.serializers import DiveLogSerializer
 
 class DivesiteViewSet(viewsets.ModelViewSet):
 
@@ -36,17 +34,6 @@ class DivesiteViewSet(viewsets.ModelViewSet):
         # MinimalProfileSerializer and a primary key for the divesite
         serializer = DiveListSerializer(queryset, many=True)
         return Response(serializer.data)
-
-    @detail_route(methods=['get'])
-    def recent_dives(self, request, pk):
-        queryset = Divesite.objects.all()
-        max_items = 10
-        divesite = get_object_or_404(queryset, pk=pk)
-        dive_logs = DiveLog.objects.filter(dive__divesite=divesite).order_by('-creation_date')[:max_items]
-        serializer = DiveLogSerializer(dive_logs, many=True)
-        return Response(serializer.data)
-        #activities = Activity.objects.filter(divesite=divesite).select_subclasses()[:max_items]
-        #data = [activity.serializers.serializer_factory
 
     @detail_route(methods=['get'])
     def nearby_slipways(self, request, pk):

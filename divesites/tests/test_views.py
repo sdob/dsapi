@@ -10,8 +10,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from divesites import factories
 from divesites.models import Dive, Divesite
-from divesites.factories import DiveFactory, DivesiteFactory
-from myauth.factories import UserFactory
+from divesites.factories import DiveFactory, DivesiteFactory, UserFactory
 from profiles.models import Profile
 
 NUM_SITES = 4
@@ -22,7 +21,7 @@ faker = FakerFactory.create()
 class DivesiteSafeViewsTestCase(APITestCase):
 
     def setUp(self):
-        for _ in xrange(NUM_SITES):
+        for _ in range(NUM_SITES):
             ds = factories.DivesiteFactory()
 
     def test_list_view_returns_list(self):
@@ -38,7 +37,7 @@ class DivesiteSafeViewsTestCase(APITestCase):
         data = result.data
         self.assertEqual(data['name'], ds.name)
         self.assertEqual(data['id'], str(ds.id))
-        self.assertEqual(data['owner']['id'], ds.owner.profile.id)
+        self.assertEqual(data['owner']['id'], str(ds.owner.profile.id))
 
 
 class DivesiteCreateTestCase(APITestCase):
@@ -156,12 +155,10 @@ class DiveCustomViewsTestCase(APITestCase):
 
     def setUp(self):
         self.ds0, self.ds1 = factories.DivesiteFactory(), factories.DivesiteFactory()
-        for _ in xrange(NUM_DIVES):
+        for _ in range(NUM_DIVES):
             d = factories.DiveFactory(divesite=self.ds0)
         self.related_dives_url_0 = reverse('divesite-dives', args=[self.ds0.id])
         self.related_dives_url_1 = reverse('divesite-dives', args=[self.ds1.id])
-        self.recent_dives_url_0 = reverse('divesite-recent-dives', args=[self.ds0.id])
-        self.recent_dives_url_1 = reverse('divesite-recent-dives', args=[self.ds1.id])
 
     def test_get_list_of_related_dives_returns_list(self):
         result = self.client.get(reverse('divesite-dives', args=[self.ds0.id]))
@@ -186,16 +183,6 @@ class DiveCustomViewsTestCase(APITestCase):
                 }
         result = self.client.post(self.related_dives_url_0, data)
         self.assertEqual(result.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def test_get_list_of_recent_dives_returns_list(self):
-        result = self.client.get(self.recent_dives_url_0)
-        self.assertEqual(result.status_code, status.HTTP_200_OK)
-        self.assertIsInstance(result.data, list)
-
-    def test_get_list_of_recent_dives_returns_empty_list_if_no_dives(self):
-        result = self.client.get(self.recent_dives_url_1)
-        self.assertEqual(result.status_code, status.HTTP_200_OK)
-        self.assertIsInstance(result.data, list)
 
 
 class DiveCreateTestCase(APITestCase):

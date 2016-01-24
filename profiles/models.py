@@ -1,15 +1,17 @@
-from __future__ import unicode_literals
+import uuid
 
 from datetime import timedelta
 from django.db import models
 from django.utils import timezone
-from dsapi.settings import AUTH_USER_MODEL as User
+from django.contrib.auth.models import User
 from divesites.models import Dive
 
 # Create your models here.
 class Profile(models.Model):
     def __str__(self):
         return self.name
+    # ID is a UUID
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # One-to-one mapping to an authentication User model
     user = models.OneToOneField(User)
     # The user's name
@@ -33,5 +35,10 @@ def create_profile(sender, **kwargs):
     user = kwargs['instance']
     if kwargs['created']:
         profile = Profile(user=user)
+        # If the user object was populated on creation with first and
+        # last names (e.g., through social account login), then
+        # automatically set the profile's name attribute
+        if user.first_name and user.last_name:
+            profile.name = ' '.join([user.first_name, user.last_name])
         profile.save()
 post_save.connect(create_profile, sender=User)

@@ -1,5 +1,4 @@
 from datetime import timedelta
-from urlparse import urlparse
 import haversine
 from django.utils import timezone
 from rest_framework import serializers
