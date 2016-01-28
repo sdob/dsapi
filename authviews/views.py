@@ -8,13 +8,13 @@ from dsapi import settings
 
 class FacebookLogin(SocialLoginView):
     adapter_class = FacebookOAuth2Adapter
-    callback_url = 'https://dsfe.herokuapp.com/'
+    callback_url = settings.FACEBOOK_AUTH_CALLBACK_URL
     client_class = OAuth2Client
 
 
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    callback_url = 'https://dsfe.herokuapp.com'
+    callback_url = settings.GOOGLE_AUTH_CALLBACK_URL
     client_class = OAuth2Client
     # Try overriding social login
     # see: https://www.bountysource.com/issues/10278183-social-rest-auth-with-rest_session_login-true

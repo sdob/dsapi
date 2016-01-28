@@ -172,3 +172,7 @@ SOCIALACCOUNT_EMAIL_REQUIRED = False
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 ACCOUNT_USERNAME_REQUIRED = False # could be the issue
+
+# Social authentication callback URLs
+FACEBOOK_AUTH_CALLBACK_URL = os.environ.get('FACEBOOK_AUTH_CALLBACK_URL') or 'http://localhost:9000/'
+GOOGLE_AUTH_CALLBACK_URL = os.environ.get('GOOGLE_AUTH_CALLBACK_URL') or 'http://localhost:9000/'
