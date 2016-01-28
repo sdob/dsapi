@@ -40,8 +40,8 @@ class Divesite(models.Model):
             return  sum([_.duration.total_seconds() for _ in dives]) // (60 * len(dives))
         return 0
     # Geographical coordinates
-    latitude = models.DecimalField(max_digits=15, decimal_places=12, validators=[validate_latitude])
-    longitude = models.DecimalField(max_digits=15, decimal_places=12, validators=[validate_longitude])
+    latitude = models.DecimalField(max_digits=23, decimal_places=20, validators=[validate_latitude])
+    longitude = models.DecimalField(max_digits=23, decimal_places=20, validators=[validate_longitude])
     # Country and administrative-area data; we'll use the Google reverse-geocoding API to retrieve
     # these (and store the JSON in a string in the db)
     geocoding_data = models.TextField(blank=True)
