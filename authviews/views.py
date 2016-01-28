@@ -8,7 +8,7 @@ from dsapi import settings
 
 class FacebookLogin(SocialLoginView):
     adapter_class = FacebookOAuth2Adapter
-    callback_url = 'https://dsfe.herokuapp.com'
+    callback_url = 'https://dsfe.herokuapp.com/'
     client_class = OAuth2Client
 
 
