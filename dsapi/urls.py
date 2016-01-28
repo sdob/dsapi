@@ -33,7 +33,7 @@ router.register(r'users', profiles.views.ProfileViewSet)
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include(router.urls)),
-    url(r'^auth', include('rest_auth.urls')),
+    url(r'^auth/', include('rest_auth.urls')),
     url(r'^auth/facebook/$', FacebookLogin.as_view(), name='fb_login'),
     url(r'^auth/google/$', GoogleLogin.as_view(), name='google_login'),
     url(r'^accounts/', include('allauth.socialaccount.urls')),
