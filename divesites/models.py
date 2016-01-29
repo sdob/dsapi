@@ -102,8 +102,8 @@ class Compressor(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     # Geographical coordinates
-    latitude = models.DecimalField(max_digits=15, decimal_places=12, validators=[validate_latitude])
-    longitude = models.DecimalField(max_digits=15, decimal_places=12, validators=[validate_longitude])
+    latitude = models.DecimalField(max_digits=23, decimal_places=20, validators=[validate_latitude])
+    longitude = models.DecimalField(max_digits=23, decimal_places=20, validators=[validate_longitude])
     # Creation metadata
     owner = models.ForeignKey(User, related_name='compressors')
     creation_data = models.DateTimeField(auto_now_add=True)
@@ -113,8 +113,8 @@ class Slipway(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     # Geographical coordinates
-    latitude = models.DecimalField(max_digits=15, decimal_places=12, validators=[validate_latitude])
-    longitude = models.DecimalField(max_digits=15, decimal_places=12, validators=[validate_longitude])
+    latitude = models.DecimalField(max_digits=23, decimal_places=20, validators=[validate_latitude])
+    longitude = models.DecimalField(max_digits=23, decimal_places=20, validators=[validate_longitude])
     # Creation metadata
     owner = models.ForeignKey(User, related_name='slipways')
     creation_data = models.DateTimeField(auto_now_add=True)
