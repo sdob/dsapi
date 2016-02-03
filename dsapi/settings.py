@@ -69,7 +69,9 @@ ROOT_URLCONF = 'dsapi.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates/password_reset.html'),
+            ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -176,3 +178,6 @@ ACCOUNT_USERNAME_REQUIRED = False # could be the issue
 # Social authentication callback URLs
 FACEBOOK_AUTH_CALLBACK_URL = os.environ.get('FACEBOOK_AUTH_CALLBACK_URL') or 'http://localhost:9000/'
 GOOGLE_AUTH_CALLBACK_URL = os.environ.get('GOOGLE_AUTH_CALLBACK_URL') or 'http://localhost:9000/'
+
+SPARKPOST_API_KEY = os.environ.get('SPARKPOST_API_KEY')
+EMAIL_BACKEND = 'sparkpost.django.email_backend.SparkPostEmailBackend'
