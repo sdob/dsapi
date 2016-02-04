@@ -10,6 +10,18 @@ from django.utils.translation import ugettext_lazy as _
 from dsapi.settings import GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE
 from .validators import validate_duration, validate_latitude, validate_longitude
 
+def retrieve_geocoding_json(lat, lng):
+        try:
+            url = GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE % (self.latitude, self.longitude)
+            reverse_geocoding_json = urllib.request.urlopen(url).read()
+            return reverse_geocoding_json
+        except:
+            # We might get a URLError or HTTPError, but there's really
+            # nothing we can do about it except log it
+            print('Error while retrieving geocoding JSON for %s' % self.name)
+            return None
+
+
 class Divesite(models.Model):
 
     def __str__(self):
@@ -56,16 +68,12 @@ class Divesite(models.Model):
 
     def save(self, *args, **kwargs):
         self.clean()
-        # OK, so now the model is OK
-        try:
-            url = GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE % (self.latitude, self.longitude)
-            reverse_geocoding_json = urllib.request.urlopen(url).read()
-            self.geocoding_data = reverse_geocoding_json
-        except:
-            # We might get a URLError or HTTPError, but there's really
-            # nothing we can do about it except log it
-            print('Error while retrieving geocoding JSON for %s' % self.name)
+        # OK, so now the model is OK; let's retrieve geocoding data from Google
+        geocoding_data = retrieve_geocoding_data(self.latitude, self.longitude)
+        if geocoding_data:
+            self.geocoding_data = geocoding_data
         super(Divesite, self).save(*args, **kwargs)
+
 
 class Dive(models.Model):
     class Meta:
@@ -105,6 +113,8 @@ class Compressor(models.Model):
     # Creation metadata
     owner = models.ForeignKey(User, related_name='compressors')
     creation_data = models.DateTimeField(auto_now_add=True)
+    # Geocoding data
+    geocoding_data = models.TextField(blank=True)
 
 
 class Slipway(models.Model):
@@ -117,3 +127,5 @@ class Slipway(models.Model):
     # Creation metadata
     owner = models.ForeignKey(User, related_name='slipways')
     creation_data = models.DateTimeField(auto_now_add=True)
+    # Geocoding data
+    geocoding_data = models.TextField(blank=True)
