@@ -10,9 +10,9 @@ from django.utils.translation import ugettext_lazy as _
 from dsapi.settings import GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE
 from .validators import validate_duration, validate_latitude, validate_longitude
 
-def retrieve_geocoding_json(lat, lng):
+def retrieve_geocoding_data(lat, lng):
         try:
-            url = GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE % (self.latitude, self.longitude)
+            url = GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE % (lat, lng)
             reverse_geocoding_json = urllib.request.urlopen(url).read()
             return reverse_geocoding_json
         except:
@@ -116,6 +116,13 @@ class Compressor(models.Model):
     # Geocoding data
     geocoding_data = models.TextField(blank=True)
 
+    def save(self, *args, **kwargs):
+        # Try to retrieve geocoding data from Google
+        geocoding_data = retrieve_geocoding_data(self.latitude, self.longitude)
+        if geocoding_data:
+            self.geocoding_data = geocoding_data
+        super(Slipway, self).save(*args, **kwargs)
+
 
 class Slipway(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -129,3 +136,10 @@ class Slipway(models.Model):
     creation_data = models.DateTimeField(auto_now_add=True)
     # Geocoding data
     geocoding_data = models.TextField(blank=True)
+
+    def save(self, *args, **kwargs):
+        # Try to retrieve geocoding data from Google
+        geocoding_data = retrieve_geocoding_data(self.latitude, self.longitude)
+        if geocoding_data:
+            self.geocoding_data = geocoding_data
+        super(Slipway, self).save(*args, **kwargs)
