@@ -58,15 +58,13 @@ class Divesite(models.Model):
         self.clean()
         # OK, so now the model is OK
         try:
-            reverse_geocoding_json = urllib.request.urlopen(GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE % (self.latitude, self.longitude)).read()
+            url = GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE % (self.latitude, self.longitude)
+            reverse_geocoding_json = urllib.request.urlopen(url).read()
             self.geocoding_data = reverse_geocoding_json
-            pass
-        except urllib.error.URLError:
-            # TODO: handle URL errors
-            pass
-        except urllib.error.HTTPError:
-            # TODO: Handle HTTP errors
-            pass
+        except:
+            # We might get a URLError or HTTPError, but there's really
+            # nothing we can do about it except log it
+            print('Error while retrieving geocoding JSON for %s' % self.name)
         super(Divesite, self).save(*args, **kwargs)
 
 class Dive(models.Model):
