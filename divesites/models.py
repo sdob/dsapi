@@ -108,6 +108,7 @@ class Compressor(models.Model):
     owner = models.ForeignKey(User, related_name='compressors')
     creation_data = models.DateTimeField(auto_now_add=True)
 
+
 class Slipway(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
