@@ -16,7 +16,7 @@ class UnattributedDivesiteSerializer(serializers.ModelSerializer):
 class UnattributedCompressorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Compressor
-        fields = ('id', 'description', 'latitude', 'longitude',)
+        fields = ('id', 'description', 'latitude', 'longitude', 'name',)
 
 
 class UnattributedSlipwaySerializer(serializers.ModelSerializer):
