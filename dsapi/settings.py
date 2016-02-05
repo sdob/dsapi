@@ -95,8 +95,8 @@ DATABASES = {
         'default': dj_database_url.config()
 }
 
-# Enable persistent connections
-DATABASES['default']['CONN_MAX_AGE'] = 500
+# Enable persistent connections --- disabling for the moment
+# DATABASES['default']['CONN_MAX_AGE'] = 500
 
 
 # Password validation
