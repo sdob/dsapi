@@ -92,19 +92,6 @@ class Dive(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
 
     def clean(self):
-        # Duration validation has been moved to the serializer.
-        #dt = timezone.make_aware(datetime(year=self.date.year, month=self.date.month, day=self.date.day))
-        if self.date > timezone.now().date():
-            raise ValidationError(_('Dive must have taken place in the past'))
-        if self.time:
-            d, t = (self.date, self.time)
-            dt = timezone.make_aware(
-                    datetime(year=d.year, month=d.month, day=d.day,
-                        hour=t.hour, minute=t.minute, second=t.second),
-                    timezone=t.tzinfo
-                    )
-            if dt + self.duration >= timezone.now():
-                raise ValidationError(_('Dive must have taken place in the past'))
         return super(Dive, self).clean()
 
     def save(self, *args, **kwargs):
