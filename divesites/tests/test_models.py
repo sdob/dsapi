@@ -49,18 +49,3 @@ class DiveModelTestCase(APITestCase):
     def test_foreign_key_is_set_correctly(self):
         d = factories.DiveFactory()
         self.assertTrue(Divesite.objects.filter(id=d.divesite.id).exists())
-
-    def test_start_time_in_the_future(self):
-        with self.assertRaises(ValidationError):
-            d = factories.DiveFactory(start_time=timezone.now()+timedelta(seconds=1))
-
-    def test_diver_would_still_be_underwater(self):
-        with self.assertRaises(ValidationError):
-            start_time = timezone.now() + timedelta(minutes=-30)
-            duration = timedelta(minutes=60)
-            d = factories.DiveFactory(start_time=start_time, duration=duration)
-
-    def test_negative_duration(self):
-        with self.assertRaises(ValidationError):
-            duration = timedelta(seconds=-60)
-            d = factories.DiveFactory(duration=duration)

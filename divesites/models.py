@@ -2,7 +2,7 @@ import uuid
 import urllib.request
 import urllib.error
 from django.contrib.auth.models import User
-from datetime import timedelta
+from datetime import datetime, timedelta
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -77,7 +77,7 @@ class Divesite(models.Model):
 
 class Dive(models.Model):
     class Meta:
-        ordering = ['start_time']
+        ordering = ['date', 'time']
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     comment = models.TextField(blank=True)
@@ -85,17 +85,26 @@ class Dive(models.Model):
     divesite = models.ForeignKey(Divesite, related_name="dives")
     diver = models.ForeignKey(User, related_name="dives")
     duration = models.DurationField() # TODO: Must be greater than 0
-    start_time = models.DateTimeField() # TODO: Must be in the past (i.e., date + duration < now)
+    # Date and time of dive are separate fields
+    date = models.DateField()
+    time = models.TimeField(blank=True)
     # Creation metadata
     creation_date = models.DateTimeField(auto_now_add=True)
 
     def clean(self):
-        # For now we'll be explicit about validating
-        # XXX: this logic is duplicated in the serializer. Need to think
-        # about how to abstract it.
-        validate_duration(self.duration)
-        if self.start_time + self.duration >= timezone.now():
+        # Duration validation has been moved to the serializer.
+        #dt = timezone.make_aware(datetime(year=self.date.year, month=self.date.month, day=self.date.day))
+        if self.date > timezone.now().date():
             raise ValidationError(_('Dive must have taken place in the past'))
+        if self.time:
+            d, t = (self.date, self.time)
+            dt = timezone.make_aware(
+                    datetime(year=d.year, month=d.month, day=d.day,
+                        hour=t.hour, minute=t.minute, second=t.second),
+                    timezone=t.tzinfo
+                    )
+            if dt + self.duration >= timezone.now():
+                raise ValidationError(_('Dive must have taken place in the past'))
         return super(Dive, self).clean()
 
     def save(self, *args, **kwargs):
@@ -121,7 +130,7 @@ class Compressor(models.Model):
         geocoding_data = retrieve_geocoding_data(self.latitude, self.longitude)
         if geocoding_data:
             self.geocoding_data = geocoding_data
-        super(Slipway, self).save(*args, **kwargs)
+        super(Compressor, self).save(*args, **kwargs)
 
 
 class Slipway(models.Model):

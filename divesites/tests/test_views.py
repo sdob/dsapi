@@ -190,10 +190,13 @@ class DiveCreateTestCase(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.ds = DivesiteFactory()
+        dt = faker.date_time_this_year()
         self.data = {
                 'depth': faker.random_int(min=1, max=100),
                 'duration': faker.random_int(min=1, max=100),
-                'start_time': faker.date_time_this_year(),
+                'date': dt.date(),
+                'time': dt.time(),
+                #'start_time': faker.date_time_this_year(),
                 'divesite': self.ds.id
                 }
         d = DiveFactory(divesite=self.ds)
@@ -265,32 +268,35 @@ class DiveUpdateTestCase(APITestCase):
         self.assertEqual(result.status_code, status.HTTP_200_OK)
 
     def test_start_time_can_be_edited_if_valid(self):
-        data = {'start_time': self.dive.start_time - timedelta(minutes=-1)}
+        data = {'time': (timezone.now() - timedelta(minutes=-1)).time()}
         self.client.force_authenticate(self.user)
         result = self.client.patch(self.url, data)
         self.assertEqual(result.status_code, status.HTTP_200_OK)
 
     def test_start_time_cannot_be_edited_if_invalid(self):
-        data = {'start_time': timezone.now() + timedelta(days=1)}
+        data = {
+                'date': (timezone.now() + timedelta(days=1)).date()
+                }
         self.client.force_authenticate(self.user)
         result = self.client.patch(self.url, data)
         self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_duration_can_be_edited_if_valid(self):
-        new_start_time =  timezone.now() - timedelta(hours=2) # valid start time
-        self.dive.start_time = new_start_time
+        new_start_time =  (timezone.now() - timedelta(hours=2)).time()
+        self.dive.time = new_start_time
         self.dive.save()
-        self.assertEqual(Dive.objects.get(id=self.dive.id).start_time, new_start_time)
+        self.assertEqual(Dive.objects.get(id=self.dive.id).time, new_start_time)
         data = {'duration': timedelta(hours=1)} # duration is valid given start time
         self.client.force_authenticate(user=self.user)
         result = self.client.patch(self.url, data)
         self.assertEqual(result.status_code, status.HTTP_200_OK)
 
     def test_duration_cannot_be_edited_if_invalid(self):
-        new_start_time =  timezone.now() - timedelta(hours=1) # valid start time
-        self.dive.start_time = new_start_time
+        new_start_time = (timezone.now() - timedelta(hours=1)).time()
+        self.dive.date = (timezone.now() - timedelta(hours=1)).date()
+        self.dive.time = new_start_time
         self.dive.save()
-        self.assertEqual(Dive.objects.get(id=self.dive.id).start_time, new_start_time)
+        self.assertEqual(Dive.objects.get(id=self.dive.id).time, new_start_time)
         data = {'duration': timedelta(hours=2)} # duration is invalid given start time
         self.client.force_authenticate(user=self.user)
         result = self.client.patch(self.url, data)

@@ -1,7 +1,7 @@
 import factory
 import random
 
-from datetime import timedelta
+from datetime import date, time, timedelta
 from django.utils import timezone
 from faker import Factory as FakerFactory
 from faker.generator import random
@@ -44,12 +44,14 @@ class DiveFactory(factory.DjangoModelFactory):
     def depth(self):
         return random.randint(10, 100)
     @factory.lazy_attribute
-    def start_time(self):
-        # TODO: ensure that by default this is at least one day before today
+    def date(self):
+        dt = faker.date_time_this_year(before_now=True, after_now=False) - timedelta(days=2)
+        return date(year=dt.year, month=dt.month, day=dt.day)
+    @factory.lazy_attribute
+    def time(self):
         dt = faker.date_time_this_year(before_now=True, after_now=False) - timedelta(days=2)
         tz = timezone.get_default_timezone()
-        aware = timezone.make_aware(dt, tz)
-        return aware
+        return timezone.make_aware(time(hour=dt.hour, minute=dt.minute, second=dt.second), tz)
     @factory.lazy_attribute
     def duration(self):
         seconds = random.randint(1, 60) * 60

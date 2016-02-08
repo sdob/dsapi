@@ -24,9 +24,9 @@ class Profile(models.Model):
     def get_number_of_divesites_visited(self):
         return len(set([_.divesite for _ in self.user.dives.all()]))
     def count_dives_in_last_365_days(self):
-        return Dive.objects.filter(diver=self.user, start_time__date__gte=timezone.now() - timedelta(days=365)).count()
+        return Dive.objects.filter(diver=self.user, date__gte=timezone.now() - timedelta(days=365)).count()
     def count_dives_in_last_90_days(self):
-        return Dive.objects.filter(diver=self.user, start_time__date__gte=timezone.now() - timedelta(days=90)).count()
+        return Dive.objects.filter(diver=self.user, date__gte=timezone.now() - timedelta(days=90)).count()
 
 
 # Post-save signal to create a Profile

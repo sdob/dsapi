@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 import haversine
 from django.utils import timezone
 from rest_framework import serializers
@@ -53,7 +53,7 @@ class DivesiteDistanceValidator(object):
 class DiveSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Dive
-        fields = ('comment', 'diver', 'id', 'depth', 'duration', 'divesite', 'start_time',)
+        fields = ('comment', 'diver', 'id', 'depth', 'duration', 'divesite', 'date', 'time',)
     # Provide at least ID and name attributes for the diver
     diver = MinimalProfileSerializer(source='diver.profile', read_only=True)
 
@@ -63,14 +63,31 @@ class DiveSerializer(serializers.ModelSerializer):
         # the validate method. For some reason this failed using the
         # usual attrs.get(key, default) pattern (which raises an
         # AttributeError, no idea why).
-        if 'start_time' in attrs.keys():
-            start_time = attrs['start_time']
+
+        if 'date' in attrs.keys():
+            date = attrs['date']
         else:
-            start_time = self.instance.start_time
+            date = self.instance.date
+        if 'time' in attrs.keys():
+            time = attrs['time']
+        else:
+            time = self.instance.time
         if 'duration' in attrs.keys():
             duration = attrs['duration']
         else:
             duration  = self.instance.duration
+
+        start_time = timezone.make_aware(
+                datetime(
+                    year=date.year,
+                    month=date.month,
+                    day=date.day,
+                    hour=time.hour,
+                    minute=time.minute,
+                    second=time.second
+                ),
+                timezone=time.tzinfo
+                )
 
         # Validate duration
         if duration <= timedelta(seconds=0):
@@ -82,10 +99,11 @@ class DiveSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('dive must have ended in the past')
         return attrs
 
+
 class DiveListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Dive
-        fields = ('id', 'comment', 'depth', 'duration', 'start_time', 'divesite', 'diver',)
+        fields = ('id', 'comment', 'depth', 'duration', 'date', 'time', 'divesite', 'diver',)
     diver = MinimalProfileSerializer(source='diver.profile', read_only=True)
     divesite = serializers.PrimaryKeyRelatedField(read_only=True)
 
@@ -132,6 +150,7 @@ class DivesiteListSerializer(serializers.ModelSerializer):
         fields = ('id', 'depth', 'duration', 'level', 'boat_entry', 'shore_entry', 'latitude', 'longitude','name',)
     depth = serializers.ReadOnlyField(source='get_average_maximum_depth')
     duration = serializers.ReadOnlyField(source='get_average_duration')
+
 
 class CompressorSerializer(serializers.ModelSerializer):
     class Meta:
