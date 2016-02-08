@@ -58,45 +58,22 @@ class DiveSerializer(serializers.ModelSerializer):
     diver = MinimalProfileSerializer(source='diver.profile', read_only=True)
 
     def validate(self, attrs):
-        # If we're doing a partial update, then only one (or neither)
-        # of these fields may be available in the data passed in to
-        # the validate method. For some reason this failed using the
-        # usual attrs.get(key, default) pattern (which raises an
-        # AttributeError, no idea why).
-
+        # All we care about is that users can't log a dive in the future.
         if 'date' in attrs.keys():
             date = attrs['date']
         else:
             date = self.instance.date
-        if 'time' in attrs.keys():
-            time = attrs['time']
-        else:
-            time = self.instance.time
         if 'duration' in attrs.keys():
             duration = attrs['duration']
         else:
             duration  = self.instance.duration
 
-        start_time = timezone.make_aware(
-                datetime(
-                    year=date.year,
-                    month=date.month,
-                    day=date.day,
-                    hour=time.hour,
-                    minute=time.minute,
-                    second=time.second
-                ),
-                timezone=time.tzinfo
-                )
-
         # Validate duration
         if duration <= timedelta(seconds=0):
             raise serializers.ValidationError('duration must be greater than 0')
-        # Validate start_time + duration so that dives begin and end in the past
-        if start_time >= timezone.now():
+        # Validate date: not in the future
+        if date >= timezone.now().date():
             raise serializers.ValidationError('dive must have started in the past')
-        if start_time + duration >= timezone.now():
-            raise serializers.ValidationError('dive must have ended in the past')
         return attrs
 
 
