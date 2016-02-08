@@ -72,7 +72,7 @@ class DiveSerializer(serializers.ModelSerializer):
         if duration <= timedelta(seconds=0):
             raise serializers.ValidationError('duration must be greater than 0')
         # Validate date: not in the future
-        if date >= timezone.now().date():
+        if date > timezone.now().date():
             raise serializers.ValidationError('dive must have started in the past')
         return attrs
 

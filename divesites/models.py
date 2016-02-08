@@ -87,7 +87,7 @@ class Dive(models.Model):
     duration = models.DurationField() # TODO: Must be greater than 0
     # Date and time of dive are separate fields
     date = models.DateField()
-    time = models.TimeField(blank=True)
+    time = models.TimeField(blank=True, null=True)
     # Creation metadata
     creation_date = models.DateTimeField(auto_now_add=True)
 
