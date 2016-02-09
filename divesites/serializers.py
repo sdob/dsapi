@@ -57,24 +57,16 @@ class DiveSerializer(serializers.ModelSerializer):
     # Provide at least ID and name attributes for the diver
     diver = MinimalProfileSerializer(source='diver.profile', read_only=True)
 
-    def validate(self, attrs):
+    def validate_date(self, date):
         # All we care about is that users can't log a dive in the future.
-        if 'date' in attrs.keys():
-            date = attrs['date']
-        else:
-            date = self.instance.date
-        if 'duration' in attrs.keys():
-            duration = attrs['duration']
-        else:
-            duration  = self.instance.duration
-
-        # Validate duration
-        if duration <= timedelta(seconds=0):
-            raise serializers.ValidationError('duration must be greater than 0')
-        # Validate date: not in the future
         if date > timezone.now().date():
-            raise serializers.ValidationError('dive must have started in the past')
-        return attrs
+            raise serializers.ValidationError('Dive must have started in the past.')
+        return date
+
+    def validate_duration(self, duration):
+        if duration <= timedelta(seconds=0):
+            raise serializers.ValidationError('Duration must be greater than 0.')
+        return duration
 
 
 class DiveListSerializer(serializers.ModelSerializer):
@@ -124,9 +116,11 @@ class DivesiteSerializer(serializers.ModelSerializer):
 class DivesiteListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Divesite
-        fields = ('id', 'depth', 'duration', 'level', 'boat_entry', 'shore_entry', 'latitude', 'longitude','name',)
+        fields = ('id', 'depth', 'duration', 'geocoding_data', 'level', 'boat_entry', 'shore_entry', 'latitude', 'longitude','name', 'owner',)
     depth = serializers.ReadOnlyField(source='get_average_maximum_depth')
     duration = serializers.ReadOnlyField(source='get_average_duration')
+    # Give a small amount of information about the owner
+    owner = MinimalProfileSerializer(source='owner.profile', read_only=True)
 
 
 class CompressorSerializer(serializers.ModelSerializer):
