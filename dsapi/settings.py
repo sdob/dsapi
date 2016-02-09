@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    # 'django.contrib.staticfiles', # we're not serving static files, right?
+    'django.contrib.staticfiles', # we're not serving static files, right?
     'corsheaders', # CORS headers for Django
     'rest_framework', # REST API framework
     'rest_framework.authtoken', # Token-based authentication
@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
     'divesites', # Divesite and Dive models
+    'comments', # Comments on places
     'profiles', # rich User profiles
     'authviews', # social auth hookups
 ]

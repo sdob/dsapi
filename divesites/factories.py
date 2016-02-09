@@ -3,6 +3,7 @@ import random
 
 from datetime import date, time, timedelta
 from django.utils import timezone
+from unittest.mock import patch
 from faker import Factory as FakerFactory
 from faker.generator import random
 from . import models
@@ -21,6 +22,7 @@ class UserFactory(factory.DjangoModelFactory):
         manager = cls._get_manager(model_class)
         return manager.create_user(*args, **kwargs)
 
+@patch('models.Divesite.get_geocoding_data')
 class DivesiteFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.Divesite

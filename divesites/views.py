@@ -9,6 +9,8 @@ from rest_framework.response import Response
 from .serializers import CompressorSerializer, DiveSerializer, DiveListSerializer,  DivesiteSerializer, DivesiteListSerializer, SlipwaySerializer
 from .models import Compressor, Dive, Divesite, Slipway
 from .permissions import IsDiverOrReadOnly, IsOwnerOrReadOnly
+from comments.models import DivesiteComment, SlipwayComment, CompressorComment
+from comments.serializers import DivesiteCommentSerializer, CompressorCommentSerializer, SlipwayCommentSerializer 
 
 class DivesiteViewSet(viewsets.ModelViewSet):
 
@@ -20,10 +22,15 @@ class DivesiteViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-
     def list(self, request):
         queryset = self.get_queryset()
         serializer = DivesiteListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def comments(self, request, pk):
+        queryset = DivesiteComment.objects.filter(divesite=self.get_object())
+        serializer = DivesiteCommentSerializer(queryset, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['get'])

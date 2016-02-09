@@ -18,7 +18,6 @@ def retrieve_geocoding_data(lat, lng):
         except:
             # We might get a URLError or HTTPError, but there's really
             # nothing we can do about it except log it
-            print('Error while retrieving geocoding JSON for %s' % self.name)
             return None
 
 
