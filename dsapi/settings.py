@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    # 'django.contrib.staticfiles', # we're not serving static files, right?
     'corsheaders', # CORS headers for Django
     'rest_framework', # REST API framework
     'rest_framework.authtoken', # Token-based authentication
