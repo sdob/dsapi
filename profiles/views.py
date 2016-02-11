@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from .models import Profile
 from .permissions import IsProfileOwnerOrReadOnly
-from .serializers import OwnProfileSerializer, ProfileSerializer
+from .serializers import MinimalProfileSerializer, OwnProfileSerializer, ProfileSerializer
 from divesites.models import Dive, Divesite
 from divesites.serializers import DiveSerializer, DiveListSerializer, DivesiteSerializer
 
@@ -39,4 +39,11 @@ class ProfileViewSet(viewsets.GenericViewSet,
         profile = get_object_or_404(queryset, pk=pk)
         divesites = Divesite.objects.filter(owner=profile.user)
         serializer = DivesiteSerializer(divesites, many=True)
+        return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def minimal(self, request, pk):
+        # Just get user name and ID
+        profile = get_object_or_404(Profile.objects.all(), pk=pk)
+        serializer = MinimalProfileSerializer(profile)
         return Response(serializer.data)
