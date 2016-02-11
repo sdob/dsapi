@@ -25,6 +25,7 @@ import profiles.views
 from authviews.views import FacebookLogin, GoogleLogin
 
 router = DefaultRouter()
+router.register(r'comments/compressors', comments.views.CompressorCommentViewSet)
 router.register(r'comments/divesites', comments.views.DivesiteCommentViewSet)
 router.register(r'comments/slipways', comments.views.SlipwayCommentViewSet)
 router.register(r'compressors', divesites.views.CompressorViewSet)
