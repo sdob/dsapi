@@ -6,7 +6,8 @@ from divesites.permissions import IsOwnerOrReadOnly
 from .models import DivesiteComment, SlipwayComment, CompressorComment
 from .serializers import DivesiteCommentSerializer, SlipwayCommentSerializer, CompressorCommentSerializer
 
-# Create your views here.
+# Viewsets for comments.
+
 class DivesiteCommentViewSet(viewsets.GenericViewSet,
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
@@ -18,4 +19,20 @@ class DivesiteCommentViewSet(viewsets.GenericViewSet,
     serializer_class = DivesiteCommentSerializer
 
     def perform_create(self, serializer):
+        # Pull the divesite ID out of the request data
         serializer.save(owner=self.request.user, divesite=Divesite.objects.get(id=self.request.data['divesite']))
+
+
+class SlipwayCommentViewSet(viewsets.GenericViewSet,
+        mixins.CreateModelMixin,
+        mixins.RetrieveModelMixin,
+        mixins.UpdateModelMixin,
+        mixins.DestroyModelMixin):
+
+    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
+    queryset = SlipwayComment.objects.all()
+    serializer_class = SlipwayCommentSerializer
+
+    def perform_create(self, serializer):
+        # Pull the slipway ID out of the request data
+        serializer.save(owner=self.request.user, slipway=Slipway.objects.get(id=self.request.data['slipway']))
