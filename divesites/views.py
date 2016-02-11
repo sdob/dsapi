@@ -93,6 +93,12 @@ class CompressorViewSet(viewsets.ModelViewSet):
         # Set the owner
         serializer.save(owner=self.request.user)
 
+    @detail_route(methods=['get'])
+    def comments(self, request, pk):
+        queryset = CompressorComment.objects.filter(compressor=self.get_object())
+        serializer = CompressorCommentSerializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class SlipwayViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
