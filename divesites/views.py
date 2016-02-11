@@ -102,3 +102,9 @@ class SlipwayViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Set the owner
         serializer.save(owner=self.request.user)
+
+    @detail_route(methods=['get'])
+    def comments(self, request, pk):
+        queryset = SlipwayComment.objects.filter(slipway=self.get_object())
+        serializer = SlipwayCommentSerializer(queryset, many=True)
+        return Response(serializer.data)
