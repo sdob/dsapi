@@ -18,6 +18,10 @@ class Profile(models.Model):
     name = models.CharField(max_length=200)
     # An arbitrary text field containing bio data, etc.
     about_me = models.TextField(blank=True)
+
+    # Users this user follows
+    follow_targets = models.ManyToManyField('self', related_name='followers', symmetrical=False)
+
     # Some stats
     def get_hours_underwater(self):
         return sum([_.duration.total_seconds() for _ in self.user.dives.all()]) // (3600)
