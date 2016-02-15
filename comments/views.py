@@ -19,8 +19,13 @@ class CompressorCommentViewSet(viewsets.GenericViewSet,
     serializer_class = CompressorCommentSerializer
 
     def perform_create(self, serializer):
-        # Pull the slipway ID out of the request data
-        serializer.save(owner=self.request.user, compressor=Compressor.objects.get(id=self.request.data['compressor']))
+        user = self.request.user
+        # Pull the compressor ID out of the request data
+        compressor = Compressor.objects.get(id=self.request.data['compressor'])
+        # Save the instance
+        instance = serializer.save(owner=user, compressor=compressor)
+        # Send an activity stream action
+        action.send(user, verb='commented on', action_object=instance, target=compressor)
 
 
 class DivesiteCommentViewSet(viewsets.GenericViewSet,
@@ -35,11 +40,12 @@ class DivesiteCommentViewSet(viewsets.GenericViewSet,
 
     def perform_create(self, serializer):
         user = self.request.user
-        divesite = Divesite.objects.get(id=self.request.data['divesite'])
         # Pull the divesite ID out of the request data
+        divesite = Divesite.objects.get(id=self.request.data['divesite'])
+        # Save the instance
         instance = serializer.save(owner=self.request.user, divesite=divesite)
         # Send an activity stream action
-        action.send(user, verb="commented", action_object=instance, target=divesite)
+        action.send(user, verb='commented on', action_object=instance, target=divesite)
 
 
 class SlipwayCommentViewSet(viewsets.GenericViewSet,
@@ -53,5 +59,10 @@ class SlipwayCommentViewSet(viewsets.GenericViewSet,
     serializer_class = SlipwayCommentSerializer
 
     def perform_create(self, serializer):
+        user=self.request.user
         # Pull the slipway ID out of the request data
-        serializer.save(owner=self.request.user, slipway=Slipway.objects.get(id=self.request.data['slipway']))
+        slipway=Slipway.objects.get(id=self.request.data['slipway'])
+        # Save the instance
+        instance = serializer.save(owner=user, slipway=slipway)
+        # Send an activity stream icon
+        action.send(user, verb='commented on', action_object=instance, target=slipway)
