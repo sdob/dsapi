@@ -86,7 +86,7 @@ class DiveViewSet(viewsets.GenericViewSet,
         # Unless we explicitly set the divesite ID here, we get an IntegrityError (?)
         instance = serializer.save(diver=user, divesite=divesite)
         # Create an activity stream action
-        action.send(user, verb="logged", action_object=instance, target=divesite)
+        action.send(user, verb="logged a dive at", action_object=instance, target=divesite)
 
 
 class CompressorViewSet(viewsets.ModelViewSet):
