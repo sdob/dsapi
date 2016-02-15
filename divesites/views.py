@@ -1,3 +1,4 @@
+from actstream import action
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from haversine import haversine
@@ -80,8 +81,12 @@ class DiveViewSet(viewsets.GenericViewSet,
     serializer_class = DiveSerializer
 
     def perform_create(self, serializer):
+        divesite = Divesite.objects.get(id=self.request.data['divesite'])
+        user = self.request.user
         # Unless we explicitly set the divesite ID here, we get an IntegrityError (?)
-        serializer.save(diver=self.request.user, divesite=Divesite.objects.get(id=self.request.data['divesite']))
+        instance = serializer.save(diver=user, divesite=divesite)
+        # Create an activity stream action
+        action.send(user, verb="logged", action_object=instance, target=divesite)
 
 
 class CompressorViewSet(viewsets.ModelViewSet):
