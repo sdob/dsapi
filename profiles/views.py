@@ -1,3 +1,4 @@
+from actstream.models import Action, user_stream
 from django.shortcuts import render, get_object_or_404
 from rest_framework import mixins
 from rest_framework import viewsets
@@ -6,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from .models import Profile
 from .permissions import IsProfileOwnerOrReadOnly
-from .serializers import MinimalProfileSerializer, OwnProfileSerializer, ProfileSerializer
+from .serializers import MinimalProfileSerializer, OwnProfileSerializer, ProfileSerializer, ActionSerializer
 from divesites.models import Dive, Divesite
 from divesites.serializers import DiveSerializer, DiveListSerializer, DivesiteSerializer
 
@@ -23,6 +24,16 @@ class ProfileViewSet(viewsets.GenericViewSet,
     #@list_route(methods=['get'])
     def me(self, request):
         serializer = OwnProfileSerializer(request.user.profile)
+        return Response(serializer.data)
+
+    @list_route(methods=['get'], permission_classes=[IsAuthenticated])
+    def feed(self, request):
+        # Retrieve the list of actions for which the requesting user is
+        # (a) the actor
+        user = request.user
+        stream = Action.objects.all()
+        qs = stream.filter(actor_object_id=user.id)
+        serializer = ActionSerializer(qs, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['get'])
