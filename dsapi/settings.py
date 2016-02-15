@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'comments', # Comments on places
     'profiles', # rich User profiles
     'authviews', # social auth hookups
+    'actstream', # Activity stream
 ]
 
 MIDDLEWARE_CLASSES = [
