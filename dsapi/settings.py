@@ -32,7 +32,10 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'django.contrib.admin',
-    'django.contrib.auth',
+    # NOTE: because we need to register auth.User with actstream, we
+    # can't just install 'django.contrib.auth'; hence the workaround here.
+    #'django.contrib.auth',
+    'dsapi.apps.DjangoContribAuthConfig',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
