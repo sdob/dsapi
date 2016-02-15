@@ -1,3 +1,4 @@
+from actstream.models import user_stream
 from faker import Factory
 from django.core.urlresolvers import reverse
 from django.test import TestCase
@@ -58,3 +59,21 @@ class SanityCheckTestCase(APITestCase):
         data = {'text': new_text}
         response = self.client.patch(reverse('divesitecomment-detail', args=[c.id]), data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class ActivityCreationTestCase(APITestCase):
+    
+    def setUp(self):
+        self.u  = UserFactory()
+        self.ds = DivesiteFactory()
+
+    def test_commenting_creates_an_action(self):
+        self.client.force_authenticate(self.u)
+        data = {
+                'text': faker.text(),
+                'divesite': self.ds.id
+                }
+        response = self.client.post(reverse('divesitecomment-list'), data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        stream = user_stream(self.u, with_user_activity=True)
+        self.assertEqual(len(stream), 1)

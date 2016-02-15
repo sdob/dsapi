@@ -1,3 +1,4 @@
+from actstream import action
 from django.shortcuts import render
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -33,8 +34,12 @@ class DivesiteCommentViewSet(viewsets.GenericViewSet,
     serializer_class = DivesiteCommentSerializer
 
     def perform_create(self, serializer):
+        user = self.request.user
+        divesite = Divesite.objects.get(id=self.request.data['divesite'])
         # Pull the divesite ID out of the request data
-        serializer.save(owner=self.request.user, divesite=Divesite.objects.get(id=self.request.data['divesite']))
+        instance = serializer.save(owner=self.request.user, divesite=divesite)
+        # Send an activity stream action
+        action.send(user, verb="commented", action_object=instance, target=divesite)
 
 
 class SlipwayCommentViewSet(viewsets.GenericViewSet,
