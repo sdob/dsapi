@@ -105,7 +105,7 @@ class ActionSerializer(serializers.ModelSerializer):
     # http://davidmburke.com/2015/07/08/building-an-api-for-django-activity-stream-with-generic-foreign-keys/
     class Meta:
         model = Action
-        fields = ('actor', 'target', 'action_object', 'verb',)
+        fields = ('actor', 'target', 'action_object', 'timestamp', 'verb',)
     actor = GenericRelatedField(read_only=True)
     target = GenericRelatedField(read_only=True)
     action_object = GenericRelatedField(read_only=True)
