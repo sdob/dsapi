@@ -1,6 +1,11 @@
+from actstream.models import Action
 from rest_framework import serializers
 from .models import Profile
+from django.contrib.auth.models import User
 from divesites.models import Compressor, Dive, Divesite, Slipway
+from comments.models import DivesiteComment
+#from comments.serializers import DivesiteCommentSerializer
+
 
 # We need to define our own custom serializers for divesites models in
 # here, because we can't import serializers from the divesites module
@@ -12,6 +17,7 @@ class UnattributedDivesiteSerializer(serializers.ModelSerializer):
         model = Divesite
         fields = ('id', 'name', 'description', 'boat_entry', 'shore_entry',
                 'level', 'latitude', 'longitude',)
+
 
 class UnattributedCompressorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -39,6 +45,13 @@ class MinimalProfileSerializer(serializers.ModelSerializer):
         fields = ('id', 'name',)
 
 
+class UnattributedDivesiteCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DivesiteComment
+        fields = ('divesite', 'text', 'creation_date',)
+        divesite = UnattributedDivesiteSerializer()
+
+
 class OwnProfileSerializer(serializers.ModelSerializer):
     """This serializer exposes an email address and certain other personally-identifying information,
     so use with care."""
@@ -59,6 +72,7 @@ class OwnProfileSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
+        exclude = ('user',)
     compressors = UnattributedCompressorSerializer(source='user.compressors', many=True, read_only=True)
     dives = UnattributedDiveSerializer(source='user.dives', many=True, read_only=True)
     dives_in_last_365_days = serializers.ReadOnlyField(source='count_dives_in_last_365_days');
@@ -67,3 +81,31 @@ class ProfileSerializer(serializers.ModelSerializer):
     divesites_visited = serializers.ReadOnlyField(source='get_number_of_divesites_visited');
     date_joined = serializers.ReadOnlyField(source='user.date_joined', read_only=True)
     hours_underwater = serializers.ReadOnlyField(source='get_hours_underwater')
+
+
+# Generic related field for django-activity-stream objects.
+class GenericRelatedField(serializers.Field):
+    def to_representation(self, value):
+        if isinstance(value, Profile):
+            return MinimalProfileSerializer(value).data
+        if isinstance(value, User):
+            data = MinimalProfileSerializer(value.profile).data
+            return data
+        if isinstance(value, Dive):
+            return UnattributedDiveSerializer(value).data
+        if isinstance(value, DivesiteComment):
+            return UnattributedDivesiteCommentSerializer(value).data
+        if isinstance(value, Divesite):
+            return UnattributedDivesiteSerializer(value).data
+        return str(value)
+
+
+class ActionSerializer(serializers.ModelSerializer):
+    # Serialize an activity-stream action. Based on:
+    # http://davidmburke.com/2015/07/08/building-an-api-for-django-activity-stream-with-generic-foreign-keys/
+    class Meta:
+        model = Action
+        fields = ('actor', 'target', 'action_object', 'verb',)
+    actor = GenericRelatedField(read_only=True)
+    target = GenericRelatedField(read_only=True)
+    action_object = GenericRelatedField(read_only=True)
