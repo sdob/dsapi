@@ -16,6 +16,7 @@ from divesites.serializers import DiveSerializer, DiveListSerializer, DivesiteSe
 class FeedPaginator(pagination.LimitOffsetPagination):
     default_limit = 10
 
+
 class ProfileViewSet(viewsets.GenericViewSet,
         mixins.UpdateModelMixin,
         mixins.RetrieveModelMixin):
@@ -25,7 +26,6 @@ class ProfileViewSet(viewsets.GenericViewSet,
     serializer_class = ProfileSerializer
 
     @list_route(methods=['get'], permission_classes=[IsAuthenticated])
-    #@list_route(methods=['get'])
     def me(self, request):
         serializer = OwnProfileSerializer(request.user.profile)
         return Response(serializer.data)
