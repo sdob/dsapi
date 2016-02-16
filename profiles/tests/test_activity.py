@@ -1,4 +1,5 @@
-from actstream.models import Action
+from actstream.actions import follow, unfollow
+from actstream.models import Action, following, followers, user_stream
 from django.core.urlresolvers import reverse
 from faker import Factory
 from divesites.factories import CompressorFactory, DivesiteFactory, SlipwayFactory, UserFactory
@@ -6,6 +7,27 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 faker = Factory.create()
+
+class ProfileFollowTestCase(APITestCase):
+
+    def setUp(self):
+        self.profile_to_follow = UserFactory().profile
+
+    def test_users_can_follow_other_users(self):
+        u = UserFactory()
+        self.client.force_authenticate(u)
+        follow(u, self.profile_to_follow.user)
+        self.assertEqual(len(following(u)), 1)
+        self.assertEqual(len(followers(self.profile_to_follow.user)), 1)
+
+    def test_users_can_see_other_users_activity_in_their_feeds(self):
+        u = UserFactory()
+        follow(u, self.profile_to_follow.user)
+        ds = DivesiteFactory(owner=self.profile_to_follow.user)
+        self.assertEqual(len(user_stream(u)), 1)
+        a = user_stream(u)[0]
+        self.assertEqual(a.actor_object_id, str(self.profile_to_follow.user.id))
+
 
 class ProfileFeedTestCase(APITestCase):
 
