@@ -26,7 +26,8 @@ class ProfileFeedTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response = self.client.get(reverse('profile-feed'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
+        data = response.data
+        self.assertEqual(data['count'], 1)
 
     def test_can_retrieve_divesitecomment_activity(self):
         self.client.force_authenticate(self.u)
@@ -37,7 +38,7 @@ class ProfileFeedTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response = self.client.get(reverse('profile-feed'))
         data = response.data
-        self.assertEqual(len(data), 1)
+        self.assertEqual(data['count'], 1)
 
     def test_can_retrieve_slipwaycomment_activity(self):
         slipway = SlipwayFactory()
@@ -49,7 +50,7 @@ class ProfileFeedTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response = self.client.get(reverse('profile-feed'))
         data = response.data
-        self.assertEqual(len(data), 1)
+        self.assertEqual(data['count'], 1)
 
     def test_can_retrieve_compressorcomment_activity(self):
         compressor = CompressorFactory()
@@ -61,7 +62,7 @@ class ProfileFeedTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response = self.client.get(reverse('profile-feed'))
         data = response.data
-        self.assertEqual(len(data), 1)
+        self.assertEqual(data['count'], 1)
 
     def test_can_retrieve_activity_for_mixed_types(self):
         slipway = SlipwayFactory()
@@ -103,4 +104,5 @@ class ProfileFeedTestCase(APITestCase):
         # Get our feed
         response = self.client.get(reverse('profile-feed'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 4)
+        data = response.data
+        self.assertEqual(data['count'], 4)
