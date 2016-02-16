@@ -40,8 +40,6 @@ class ProfileViewSet(viewsets.GenericViewSet,
         # Paginate the queryset
         paginator = FeedPaginator()
         paginated_queryset = paginator.paginate_queryset(qs, request, view=self)
-        print('paginated_queryset')
-        print(paginated_queryset)
         serializer = ActionSerializer(paginated_queryset, many=True)
         # Generate a response
         paginated_response = paginator.get_paginated_response(serializer.data)
