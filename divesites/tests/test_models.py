@@ -1,11 +1,21 @@
+from actstream.models import Action
 from datetime import timedelta
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 from rest_framework.test import APITestCase
 
-from divesites.models import Divesite
+from divesites.models import Compressor, Dive, Divesite, Slipway
 from divesites import factories
+
+class CompressorModelTestCase(APITestCase):
+
+    def test_creation_succeeds(self):
+        c = factories.CompressorFactory()
+        c.save()
+        self.assertEqual(Compressor.objects.count(), 1)
+        self.assertTrue(Action.objects.filter(target_object_id=c.id).exists())
+
 
 class DivesiteModelTestCase(APITestCase):
 
@@ -13,6 +23,7 @@ class DivesiteModelTestCase(APITestCase):
         ds = factories.DivesiteFactory()
         ds.save()
         self.assertEqual(Divesite.objects.count(), 1)
+        self.assertTrue(Action.objects.filter(target_object_id=ds.id).exists())
 
     def test_max_latitude(self):
         with self.assertRaises(ValidationError):
@@ -45,6 +56,16 @@ class DivesiteModelTestCase(APITestCase):
 
 
 class DiveModelTestCase(APITestCase):
+
+    def test_creation_adds_an_action(self):
+        user = factories.UserFactory()
+        divesite = factories.DivesiteFactory()
+        d = factories.DiveFactory(diver=user, divesite=divesite)
+        self.assertTrue(Action.objects.filter(action_object_object_id=d.id).exists())
+        self.assertEqual(Action.objects.filter(action_object_object_id=d.id).count(), 1)
+        a = Action.objects.filter(action_object_object_id=d.id)[0]
+        self.assertEqual(a.target_object_id, str(divesite.id))
+        self.assertEqual(a.actor_object_id, str(user.id))
 
     def test_foreign_key_is_set_correctly(self):
         d = factories.DiveFactory()
