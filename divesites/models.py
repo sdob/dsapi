@@ -1,10 +1,12 @@
 import uuid
 import urllib.request
 import urllib.error
+from actstream import action
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.signals import post_save
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from dsapi.settings import GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE
@@ -138,3 +140,10 @@ class Slipway(models.Model):
         if geocoding_data:
             self.geocoding_data = geocoding_data
         super(Slipway, self).save(*args, **kwargs)
+
+# Post-save signals
+def send_divesite_creation_action(sender, instance, created, **kwargs):
+    if created:
+        print('%s created %s' % (instance.owner, instance))
+        action.send(instance.owner, verb='created', target=instance)
+post_save.connect(send_divesite_creation_action, sender=Divesite)

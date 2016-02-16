@@ -23,8 +23,6 @@ class DivesiteViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = self.request.user
         instance = serializer.save(owner=user)
-        # Send an action
-        action.send(user, verb='created', target=instance)
 
     def list(self, request):
         queryset = self.get_queryset()
