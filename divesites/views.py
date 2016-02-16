@@ -21,7 +21,10 @@ class DivesiteViewSet(viewsets.ModelViewSet):
     serializer_class = DivesiteSerializer
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        user = self.request.user
+        instance = serializer.save(owner=owner)
+        # Send an action
+        action.send(user, verb='created', target=instance)
 
     def list(self, request):
         queryset = self.get_queryset()
@@ -95,8 +98,11 @@ class CompressorViewSet(viewsets.ModelViewSet):
     serializer_class = CompressorSerializer
 
     def perform_create(self, serializer):
-        # Set the owner
-        serializer.save(owner=self.request.user)
+        owner = self.request.user
+        # Save the instance
+        instance = serializer.save(owner=owner)
+        # Send an action
+        action.send(owner, verb='created', target=instance)
 
     @detail_route(methods=['get'])
     def comments(self, request, pk):
@@ -111,8 +117,11 @@ class SlipwayViewSet(viewsets.ModelViewSet):
     serializer_class = SlipwaySerializer
 
     def perform_create(self, serializer):
-        # Set the owner
-        serializer.save(owner=self.request.user)
+        owner = self.request.user
+        # Save the instance
+        instance = serializer.save(owner=owner)
+        # Send an action
+        action.send(owner, verb='created', target=instance)
 
     @detail_route(methods=['get'])
     def comments(self, request, pk):

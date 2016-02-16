@@ -95,8 +95,12 @@ class GenericRelatedField(serializers.Field):
             return UnattributedDiveSerializer(value).data
         if isinstance(value, DivesiteComment):
             return UnattributedDivesiteCommentSerializer(value).data
+        if isinstance(value, Compressor):
+            return UnattributedCompressorSerializer(value).data
         if isinstance(value, Divesite):
             return UnattributedDivesiteSerializer(value).data
+        if isinstance(value, Slipway):
+            return UnattributedSlipwaySerializer(value).data
         return str(value)
 
 
