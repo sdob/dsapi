@@ -27,13 +27,16 @@ class ProfileViewSet(viewsets.GenericViewSet,
 
     @list_route(methods=['get'], permission_classes=[IsAuthenticated])
     def me(self, request):
+        """Return the requesting user's own profile."""
         serializer = OwnProfileSerializer(request.user.profile)
         return Response(serializer.data)
 
     @list_route(methods=['get'], permission_classes=[IsAuthenticated])
     def feed(self, request):
-        # Retrieve the list of actions for which the requesting user is
-        # (a) the actor
+        """
+        Retrieve the list of actions for which the requesting user is
+        (a) the actor
+        """
         user = request.user
         stream = Action.objects.all()
         qs = stream.filter(actor_object_id=user.id)
@@ -60,6 +63,19 @@ class ProfileViewSet(viewsets.GenericViewSet,
         divesites = Divesite.objects.filter(owner=profile.user)
         serializer = DivesiteSerializer(divesites, many=True)
         return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def feed(self, request, pk):
+        queryset = Profile.objects.all()
+        profile = get_object_or_404(queryset, pk=pk)
+        qs = Action.objects.filter(actor_object_id=profile.user.id)
+        # Paginate the queryset
+        paginator = FeedPaginator()
+        paginated_queryset = paginator.paginate_queryset(qs, request, view=self)
+        serializer = ActionSerializer(paginated_queryset, many=True)
+        # Generate a response
+        paginated_response = paginator.get_paginated_response(serializer.data)
+        return paginated_response
 
     @detail_route(methods=['get'])
     def minimal(self, request, pk):
