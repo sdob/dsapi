@@ -15,7 +15,6 @@ from comments.serializers import DivesiteCommentSerializer, CompressorCommentSer
 
 class DivesiteViewSet(viewsets.ModelViewSet):
 
-
     permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
     queryset = Divesite.objects.all()
     serializer_class = DivesiteSerializer
@@ -86,8 +85,6 @@ class DiveViewSet(viewsets.GenericViewSet,
         user = self.request.user
         # Unless we explicitly set the divesite ID here, we get an IntegrityError (?)
         instance = serializer.save(diver=user, divesite=divesite)
-        # Create an activity stream action
-        action.send(user, verb="logged a dive at", action_object=instance, target=divesite)
 
 
 class CompressorViewSet(viewsets.ModelViewSet):
@@ -99,8 +96,6 @@ class CompressorViewSet(viewsets.ModelViewSet):
         owner = self.request.user
         # Save the instance
         instance = serializer.save(owner=owner)
-        # Send an action
-        action.send(owner, verb='created', target=instance)
 
     @detail_route(methods=['get'])
     def comments(self, request, pk):
@@ -118,8 +113,6 @@ class SlipwayViewSet(viewsets.ModelViewSet):
         owner = self.request.user
         # Save the instance
         instance = serializer.save(owner=owner)
-        # Send an action
-        action.send(owner, verb='created', target=instance)
 
     @detail_route(methods=['get'])
     def comments(self, request, pk):

@@ -142,8 +142,18 @@ class Slipway(models.Model):
         super(Slipway, self).save(*args, **kwargs)
 
 # Post-save signals
-def send_divesite_creation_action(sender, instance, created, **kwargs):
+def send_site_creation_action(sender, instance, created, **kwargs):
     if created:
-        print('%s created %s' % (instance.owner, instance))
+        verb = 'created'
+        # print('%s %s %s' % (instance.owner, verb, instance))
         action.send(instance.owner, verb='created', target=instance)
-post_save.connect(send_divesite_creation_action, sender=Divesite)
+post_save.connect(send_site_creation_action, sender=Compressor)
+post_save.connect(send_site_creation_action, sender=Divesite)
+post_save.connect(send_site_creation_action, sender=Slipway)
+
+def send_dive_creation_action(sender, instance, created, **kwargs):
+    if created:
+        verb = 'logged a dive at'
+        # print('%s %s %s' % (instance.diver, verb, instance.divesite))
+        action.send(instance.diver, verb='created', action_object=instance, target=instance.divesite)
+post_save.connect(send_dive_creation_action, sender=Dive)
