@@ -32,7 +32,7 @@ class ProfileViewSet(viewsets.GenericViewSet,
         return Response(serializer.data)
 
     @list_route(methods=['get'], permission_classes=[IsAuthenticated])
-    def feed(self, request):
+    def my_feed(self, request):
         """
         Retrieve the list of actions for which the requesting user is
         (a) the actor

@@ -46,7 +46,7 @@ class ProfileFeedTestCase(APITestCase):
             'divesite': self.ds.id
             })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        response = self.client.get(reverse('profile-feed'))
+        response = self.client.get(reverse('profile-my-feed'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data
         self.assertEqual(data['count'], 1)
@@ -58,7 +58,7 @@ class ProfileFeedTestCase(APITestCase):
             'divesite': self.ds.id
             })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        response = self.client.get(reverse('profile-feed'))
+        response = self.client.get(reverse('profile-my-feed'))
         data = response.data
         self.assertEqual(data['count'], 1)
 
@@ -70,7 +70,7 @@ class ProfileFeedTestCase(APITestCase):
             'slipway': slipway.id,
             })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        response = self.client.get(reverse('profile-feed'))
+        response = self.client.get(reverse('profile-my-feed'))
         data = response.data
         self.assertEqual(data['count'], 1)
 
@@ -82,7 +82,7 @@ class ProfileFeedTestCase(APITestCase):
             'compressor': compressor.id,
             })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        response = self.client.get(reverse('profile-feed'))
+        response = self.client.get(reverse('profile-my-feed'))
         data = response.data
         self.assertEqual(data['count'], 1)
 
@@ -124,7 +124,7 @@ class ProfileFeedTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Get our feed
-        response = self.client.get(reverse('profile-feed'))
+        response = self.client.get(reverse('profile-my-feed'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data
         self.assertEqual(data['count'], 4)
