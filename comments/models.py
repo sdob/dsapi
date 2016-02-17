@@ -7,6 +7,8 @@ from divesites.models import Divesite, Compressor, Slipway
 
 # Create your models here.
 class Comment(models.Model):
+    class Meta:
+        ordering = ['creation_date']
     owner = models.ForeignKey(User, related_name="comments")
     text = models.TextField()
     creation_date = models.DateTimeField(auto_now_add=True, null=True)
