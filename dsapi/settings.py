@@ -186,3 +186,8 @@ GOOGLE_AUTH_CALLBACK_URL = os.environ.get('GOOGLE_AUTH_CALLBACK_URL') or 'http:/
 
 SPARKPOST_API_KEY = os.environ.get('SPARKPOST_API_KEY')
 EMAIL_BACKEND = 'sparkpost.django.email_backend.SparkPostEmailBackend'
+
+# Django-activity-stream settings
+ACTSTREAM_SETTINGS = {
+        'FETCH_RELATIONS': False
+        }
