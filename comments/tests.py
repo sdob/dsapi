@@ -1,11 +1,13 @@
-from actstream.models import user_stream
+from actstream.models import Action, user_stream
 from faker import Factory
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APITestCase
 from divesites.factories import DivesiteFactory, UserFactory
 from comments.factories import DivesiteCommentFactory
+from comments.models import DivesiteComment
 
 faker = Factory.create()
 
@@ -77,3 +79,17 @@ class ActivityCreationTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         stream = user_stream(self.u, with_user_activity=True)
         self.assertEqual(len(stream), 1)
+
+    def test_created_action_has_a_target_and_an_action_object(self):
+        self.client.force_authenticate(self.u)
+        data = {
+                'text': faker.text(),
+                'divesite': self.ds.id
+                }
+        response = self.client.post(reverse('divesitecomment-list'), data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        comment = DivesiteComment.objects.get(divesite=self.ds)
+        stream = user_stream(self.u, with_user_activity=True)
+        a = stream[0]
+        self.assertEqual(a.target, self.ds)
+        self.assertEqual(a.action_object, comment)

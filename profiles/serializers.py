@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import Profile
 from django.contrib.auth.models import User
 from divesites.models import Compressor, Dive, Divesite, Slipway
-from comments.models import DivesiteComment
+from comments.models import CompressorComment, DivesiteComment, SlipwayComment
 #from comments.serializers import DivesiteCommentSerializer
 
 
@@ -45,12 +45,24 @@ class MinimalProfileSerializer(serializers.ModelSerializer):
         fields = ('id', 'name',)
 
 
+class UnattributedCompressorCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompressorComment
+        fields = ('compressor', 'text', 'creation_date',)
+        Compressor = UnattributedCompressorSerializer()
+
+
 class UnattributedDivesiteCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = DivesiteComment
         fields = ('divesite', 'text', 'creation_date',)
         divesite = UnattributedDivesiteSerializer()
 
+class UnattributedSlipwayCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SlipwayComment
+        fields = ('slipway', 'text', 'creation_date',)
+        divesite = UnattributedSlipwaySerializer()
 
 class OwnProfileSerializer(serializers.ModelSerializer):
     """This serializer exposes an email address and certain other personally-identifying information,
@@ -86,6 +98,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 # Generic related field for django-activity-stream objects.
 class GenericRelatedField(serializers.Field):
     def to_representation(self, value):
+        print('serializing a %s' % value.__class__)
         if isinstance(value, Profile):
             return MinimalProfileSerializer(value).data
         if isinstance(value, User):
@@ -93,14 +106,23 @@ class GenericRelatedField(serializers.Field):
             return data
         if isinstance(value, Dive):
             return UnattributedDiveSerializer(value).data
+
+        # Handle comments
         if isinstance(value, DivesiteComment):
             return UnattributedDivesiteCommentSerializer(value).data
+        if isinstance(value, CompressorComment):
+            return UnattributedCompressorCommentSerializer(value).data
+        if isinstance(value, SlipwayComment):
+            return UnattributedSlipwayCommentSerializer(value).data
+
+        # Handle places
         if isinstance(value, Compressor):
             return UnattributedCompressorSerializer(value).data
         if isinstance(value, Divesite):
             return UnattributedDivesiteSerializer(value).data
         if isinstance(value, Slipway):
             return UnattributedSlipwaySerializer(value).data
+        print('couldn\'t grab it by value tho')
         return str(value)
 
 
@@ -110,7 +132,7 @@ class ActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Action
         fields = ('actor', 'target', 'action_object', 'timestamp', 'verb',
-                'target_type')
+                'target_type', 'target_object_id',)
     actor = GenericRelatedField(read_only=True)
     target = GenericRelatedField(read_only=True)
     action_object = GenericRelatedField(read_only=True)

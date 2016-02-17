@@ -12,21 +12,46 @@ class ProfileFollowTestCase(APITestCase):
 
     def setUp(self):
         self.profile_to_follow = UserFactory().profile
+        self.p = self.profile_to_follow
 
-    def test_users_can_follow_other_users(self):
+    def test_users_can_follow_other_users_on_the_model_side(self):
         u = UserFactory()
         self.client.force_authenticate(u)
         follow(u, self.profile_to_follow.user)
         self.assertEqual(len(following(u)), 1)
         self.assertEqual(len(followers(self.profile_to_follow.user)), 1)
 
-    def test_users_can_see_other_users_activity_in_their_feeds(self):
+    def test_users_can_see_other_users_activity_in_their_feeds_on_the_model_side(self):
         u = UserFactory()
         follow(u, self.profile_to_follow.user)
         ds = DivesiteFactory(owner=self.profile_to_follow.user)
         self.assertEqual(len(user_stream(u)), 1)
         a = user_stream(u)[0]
         self.assertEqual(a.actor_object_id, str(self.profile_to_follow.user.id))
+
+    def test_users_can_see_who_they_are_following(self):
+        u = UserFactory()
+        follow(u, self.profile_to_follow.user)
+        self.client.force_authenticate(u)
+        response = self.client.get(reverse('profile-my-follows'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        data = response.data
+        self.assertEqual(data[0]['id'], str(self.profile_to_follow.id))
+
+    def test_users_can_follow_other_users(self):
+        u = UserFactory()
+        self.client.force_authenticate(u)
+        url = reverse('profile-follow', args=[self.p.id])
+        response = self.client.post(reverse('profile-follow', args=[self.p.id]), {})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Confirm that the user is now following
+        response = self.client.get(reverse('profile-my-follows'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Have the followed user do something
+        ds = DivesiteFactory(owner=self.p.user)
+        # Confirm that the followed user's recent activity is in there
+        response = self.client.get(reverse('profile-my-feed'))
 
 
 class ProfileFeedTestCase(APITestCase):

@@ -24,8 +24,6 @@ class CompressorCommentViewSet(viewsets.GenericViewSet,
         compressor = Compressor.objects.get(id=self.request.data['compressor'])
         # Save the instance
         instance = serializer.save(owner=user, compressor=compressor)
-        # Send an activity stream action
-        action.send(user, verb='commented on', action_object=instance, target=compressor)
 
 
 class DivesiteCommentViewSet(viewsets.GenericViewSet,
@@ -44,8 +42,6 @@ class DivesiteCommentViewSet(viewsets.GenericViewSet,
         divesite = Divesite.objects.get(id=self.request.data['divesite'])
         # Save the instance
         instance = serializer.save(owner=self.request.user, divesite=divesite)
-        # Send an activity stream action
-        action.send(user, verb='commented on', action_object=instance, target=divesite)
 
 
 class SlipwayCommentViewSet(viewsets.GenericViewSet,
@@ -64,5 +60,3 @@ class SlipwayCommentViewSet(viewsets.GenericViewSet,
         slipway=Slipway.objects.get(id=self.request.data['slipway'])
         # Save the instance
         instance = serializer.save(owner=user, slipway=slipway)
-        # Send an activity stream icon
-        action.send(user, verb='commented on', action_object=instance, target=slipway)
