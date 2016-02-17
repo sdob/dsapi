@@ -16,7 +16,7 @@ class UnattributedDivesiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Divesite
         fields = ('id', 'name', 'description', 'boat_entry', 'shore_entry',
-                'level', 'latitude', 'longitude',)
+                'level', 'latitude', 'longitude', 'creation_date',)
 
 
 class UnattributedCompressorSerializer(serializers.ModelSerializer):
@@ -34,7 +34,7 @@ class UnattributedSlipwaySerializer(serializers.ModelSerializer):
 class UnattributedDiveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dive
-        fields = ('id', 'depth', 'duration', 'comment', 'date', 'time', 'divesite', 'creation_date',)
+        fields = ('id', 'depth', 'duration', 'comment', 'date', 'time', 'divesite',)
     divesite = UnattributedDivesiteSerializer()
 
 
