@@ -43,6 +43,19 @@ class ProfileViewSet(viewsets.GenericViewSet,
         # TODO: Return something informative to the client
         return Response({}, status=status.HTTP_200_OK, content_type='json')
 
+    @detail_route(methods=['post'], permission_classes=[IsAuthenticated])
+    def unfollow(self, request, pk):
+        # You can't unfollow yourself
+        if pk == str(request.user.profile.id):
+            raise exceptions.PermissionDenied(detail="You cannot unfollow yourself")
+        queryset = Profile.objects.all()
+        profile = get_object_or_404(queryset, pk=pk)
+        user = profile.user
+        # Now get django-activity-stream to follow
+        data = unfollow(request.user, user)
+        # TODO: Return something informative to the client
+        return Response({}, status=status.HTTP_200_OK, content_type='json')
+
     @list_route(methods=['get'], permission_classes=[IsAuthenticated])
     def me(self, request):
         """Return the requesting user's own profile."""
