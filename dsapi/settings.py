@@ -101,7 +101,7 @@ DATABASES = {
 }
 
 # Enable persistent connections --- disabling for the moment
-# DATABASES['default']['CONN_MAX_AGE'] = 500
+DATABASES['default']['CONN_MAX_AGE'] = 500
 
 
 # Password validation
