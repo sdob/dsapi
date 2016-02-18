@@ -16,7 +16,7 @@ class UnattributedDivesiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Divesite
         fields = ('id', 'name', 'description', 'boat_entry', 'shore_entry',
-                'level', 'latitude', 'longitude', 'creation_date',)
+                'level', 'latitude', 'longitude', 'creation_date', 'geocoding_data',)
 
 
 class UnattributedCompressorSerializer(serializers.ModelSerializer):
@@ -69,7 +69,7 @@ class OwnProfileSerializer(serializers.ModelSerializer):
     so use with care."""
     class Meta:
         model = Profile
-        exclude = ('user',)
+        exclude = ('follow_targets', 'user',)
     compressors = UnattributedCompressorSerializer(source='user.compressors', many=True, read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
     dives = UnattributedDiveSerializer(source='user.dives', many=True, read_only=True)
@@ -84,7 +84,7 @@ class OwnProfileSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        exclude = ('user',)
+        exclude = ('follow_targets', 'user',)
     compressors = UnattributedCompressorSerializer(source='user.compressors', many=True, read_only=True)
     dives = UnattributedDiveSerializer(source='user.dives', many=True, read_only=True)
     dives_in_last_365_days = serializers.ReadOnlyField(source='count_dives_in_last_365_days');
