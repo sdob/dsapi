@@ -161,5 +161,5 @@ def send_dive_creation_action(sender, instance, created, **kwargs):
     if created:
         verb = 'logged a dive at'
         # print('%s %s %s' % (instance.diver, verb, instance.divesite))
-        action.send(instance.diver, verb='created', action_object=instance, target=instance.divesite)
+        action.send(instance.diver, verb='logged a dive', action_object=instance, target=instance.divesite)
 post_save.connect(send_dive_creation_action, sender=Dive)
