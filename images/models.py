@@ -8,7 +8,7 @@ class BaseImage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # Creation metadata
     owner = models.ForeignKey(User)
-    caption = models.TextField()
+    caption = models.TextField(blank=True)
     creation_date = models.DateTimeField(auto_now_add=True)
     # Images can be assigned as the 'header image' of their site
     is_header_image = models.BooleanField(default=False)
