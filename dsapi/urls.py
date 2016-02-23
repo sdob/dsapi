@@ -21,6 +21,7 @@ from rest_framework.authtoken import views as authtoken_views
 from rest_framework.routers import DefaultRouter
 import comments.views
 import divesites.views
+import images.views
 import profiles.views
 from authviews.views import FacebookLogin, GoogleLogin
 
@@ -28,6 +29,11 @@ router = DefaultRouter()
 router.register(r'comments/compressors', comments.views.CompressorCommentViewSet)
 router.register(r'comments/divesites', comments.views.DivesiteCommentViewSet)
 router.register(r'comments/slipways', comments.views.SlipwayCommentViewSet)
+
+router.register(r'images/compressors', images.views.CompressorImageViewSet)
+router.register(r'images/divesites', images.views.DivesiteImageViewSet)
+router.register(r'images/slipways', images.views.SlipwayImageViewSet)
+
 router.register(r'compressors', divesites.views.CompressorViewSet)
 router.register(r'divesites', divesites.views.DivesiteViewSet)
 router.register(r'dives', divesites.views.DiveViewSet)
