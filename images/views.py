@@ -17,10 +17,8 @@ class CompressorImageViewSet(viewsets.GenericViewSet,
     serializer_class = CompressorImageSerializer
 
     def check_compressor_ownership(self, compressor):
-        owner = self.request.user
-        # If we're trying to set the header and we don't own the compressor, raise an exception
-        is_header_image = self.request.data['is_header_image']
-        if is_header_image and not owner == compressor.owner:
+        user = self.request.user
+        if 'is_header_image' in self.request.data and not user == compressor.owner:
             raise PermissionDenied()
 
     def perform_create(self, serializer):
@@ -31,6 +29,12 @@ class CompressorImageViewSet(viewsets.GenericViewSet,
         self.check_compressor_ownership(compressor)
         # Save the instance
         instance = serializer.save(owner=owner, compressor=compressor)
+
+    def perform_update(self, serializer):
+        compressor = Compressor.objects.get(id=self.request.data['compressor'])
+        # Check ownership
+        self.check_compressor_ownership(compressor)
+        serializer.save()
 
 
 class DivesiteImageViewSet(viewsets.GenericViewSet,
@@ -43,10 +47,8 @@ class DivesiteImageViewSet(viewsets.GenericViewSet,
     serializer_class = DivesiteImageSerializer
 
     def check_divesite_ownership(self, divesite):
-        owner = self.request.user
-        # If we're trying to set the header and we don't own the divesite, raise an exception
-        is_header_image = self.request.data['is_header_image']
-        if is_header_image and not owner == divesite.owner:
+        user = self.request.user
+        if 'is_header_image' in self.request.data and not user == divesite.owner:
             raise PermissionDenied()
 
     def perform_create(self, serializer):
@@ -57,6 +59,12 @@ class DivesiteImageViewSet(viewsets.GenericViewSet,
         self.check_divesite_ownership(divesite)
         # Save the instance
         instance = serializer.save(owner=owner, divesite=divesite)
+
+    def perform_update(self, serializer):
+        divesite = Divesite.objects.get(id=self.request.data['divesite'])
+        # Check ownership
+        self.check_divesite_ownership(divesite)
+        serializer.save()
 
 
 class SlipwayImageViewSet(viewsets.GenericViewSet,
@@ -69,22 +77,21 @@ class SlipwayImageViewSet(viewsets.GenericViewSet,
     serializer_class = SlipwayImageSerializer
 
     def check_slipway_ownership(self, slipway):
-        owner = self.request.user
-        # If we're trying to set the header and we don't own the divesite, raise an exception
-        is_header_image = self.request.data['is_header_image']
-        if is_header_image and not owner == slipway.owner:
+        user = self.request.user
+        if 'is_header_image' in self.request.data and not user == slipway.owner:
             raise PermissionDenied()
 
     def perform_create(self, serializer):
         owner = self.request.user
-        # Pull the compressor ID out of the request data
-        slipway = Slipway.objects.get(id=self.request.data['slipway'])
+        slipway_id = self.request.data['slipway']
+        slipway = Slipway.objects.get(id=slipway_id)
         # Check ownership
         self.check_slipway_ownership(slipway)
         # Save the instance
         instance = serializer.save(owner=owner, slipway=slipway)
 
     def perform_update(self, serializer):
+        slipway = Slipway.objects.get(id=self.request.data['slipway'])
         # Check ownership
         self.check_slipway_ownership(slipway)
-        return super(self, mixins.UpdateModelMixin).perform_update(serializer)
+        serializer.save()
