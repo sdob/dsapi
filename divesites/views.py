@@ -12,6 +12,8 @@ from .models import Compressor, Dive, Divesite, Slipway
 from .permissions import IsDiverOrReadOnly, IsOwnerOrReadOnly
 from comments.models import DivesiteComment, SlipwayComment, CompressorComment
 from comments.serializers import DivesiteCommentSerializer, CompressorCommentSerializer, SlipwayCommentSerializer 
+from images.models import CompressorImage, DivesiteImage, SlipwayImage
+from images.serializers import CompressorImageSerializer, DivesiteImageSerializer, SlipwayImageSerializer
 
 class DivesiteViewSet(viewsets.ModelViewSet):
 
@@ -41,6 +43,13 @@ class DivesiteViewSet(viewsets.ModelViewSet):
         # Use DiveListSerializer since we don't need more than a
         # MinimalProfileSerializer and a primary key for the divesite
         serializer = DiveListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def images(self, request, pk):
+        divesite = self.get_object()
+        queryset = DivesiteImage.objects.filter(divesite=divesite)
+        serializer = DivesiteImageSerializer(queryset, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['get'])
@@ -103,6 +112,13 @@ class CompressorViewSet(viewsets.ModelViewSet):
         serializer = CompressorCommentSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @detail_route(methods=['get'])
+    def images(self, request, pk):
+        compressor = self.get_object()
+        queryset = CompressorImage.objects.filter(compressor=compressor)
+        serializer = CompressorImageSerializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class SlipwayViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
@@ -118,4 +134,11 @@ class SlipwayViewSet(viewsets.ModelViewSet):
     def comments(self, request, pk):
         queryset = SlipwayComment.objects.filter(slipway=self.get_object())
         serializer = SlipwayCommentSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def images(self, request, pk):
+        slipway = self.get_object()
+        queryset = SlipwayImage.objects.filter(slipway=slipway)
+        serializer = SlipwayImageSerializer(queryset, many=True)
         return Response(serializer.data)
