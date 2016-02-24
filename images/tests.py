@@ -20,7 +20,12 @@ class SanityCheckTestCase(APITestCase):
         self.user = self.divesite.owner
 
     def test_nothing_explodes(self):
-        pass
+        i = Image(content_object=self.divesite, owner=self.user)
+        i.save()
+        # Associated item is set correctly
+        self.assertEqual(i.content_object, self.divesite)
+        # Divesite knows about this image
+        self.assertIn(i, self.divesite.images.all())
 
     def test_there_can_be_only_one(self):
         pass
@@ -33,7 +38,8 @@ class ImageRetrievalTestCase(APITestCase):
         self.slipway = SlipwayFactory()
 
     def test_can_retrieve_images(self):
-        pass
+        i = Image(content_object=self.divesite, owner=self.user)
+        i.save()
 
 
 @patch('cloudinary.uploader.call_api')
@@ -64,8 +70,8 @@ class ImageCreateTestCase(APITestCase):
         self.slipway = SlipwayFactory(owner=self.owner)
 
     def test_site_owner_can_set_header_image(self, mock):
+        self.client.force_authenticate(self.owner)
         pass
-
 
     def test_only_site_owner_can_set_header_image(self, mock):
         pass

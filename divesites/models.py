@@ -4,6 +4,7 @@ import urllib.error
 from actstream import action
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
+from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save
@@ -61,6 +62,8 @@ class Divesite(models.Model):
     # Creation metadata
     owner = models.ForeignKey(User, related_name="divesites")
     creation_date = models.DateTimeField(auto_now_add=True)
+    # images, through a generic relation
+    images = GenericRelation('images.Image')
 
     def clean(self):
         validate_latitude(self.latitude)
@@ -91,6 +94,9 @@ class Dive(models.Model):
     time = models.TimeField(blank=True, null=True)
     # Creation metadata
     creation_date = models.DateTimeField(auto_now_add=True)
+
+    # images, through a generic relation
+    images = GenericRelation('images.Image')
 
     def clean(self):
         return super(Dive, self).clean()
@@ -140,12 +146,16 @@ class Slipway(models.Model):
     # Geocoding data
     geocoding_data = models.TextField(blank=True)
 
+    # images, through a generic relation
+    images = GenericRelation('images.Image')
+
     def save(self, *args, **kwargs):
         # Try to retrieve geocoding data from Google
         geocoding_data = retrieve_geocoding_data(self.latitude, self.longitude)
         if geocoding_data:
             self.geocoding_data = geocoding_data
         super(Slipway, self).save(*args, **kwargs)
+
 
 # Post-save signals
 def send_site_creation_action(sender, instance, created, **kwargs):
