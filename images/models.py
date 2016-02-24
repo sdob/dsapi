@@ -56,3 +56,10 @@ class SlipwayImage(BaseImage):
             except SlipwayImage.DoesNotExist:
                 pass
         super(SlipwayImage, self).save(*args, **kwargs)
+
+
+class UserProfileImage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    image = CloudinaryField('image')
+    user = models.OneToOneField(User, related_name='profile_image')
+    creation_date = models.DateTimeField(auto_now_add=True)

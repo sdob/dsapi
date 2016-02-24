@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import CompressorImage, DivesiteImage, SlipwayImage
+from .models import CompressorImage, DivesiteImage, SlipwayImage, UserProfileImage
 from divesites.serializers import CompressorSerializer, DivesiteSerializer, SlipwaySerializer
 from profiles.serializers import MinimalProfileSerializer
 
@@ -23,3 +23,8 @@ class SlipwayImageSerializer(BaseImageSerializer):
     class Meta:
         model = SlipwayImage
     slipway = SlipwaySerializer(read_only=True)
+
+
+class UserProfileImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfileImage

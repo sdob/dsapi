@@ -15,6 +15,8 @@ from .permissions import IsProfileOwnerOrReadOnly
 from .serializers import MinimalProfileSerializer, OwnProfileSerializer, ProfileSerializer, ActionSerializer
 from divesites.models import Dive, Divesite
 from divesites.serializers import DiveSerializer, DiveListSerializer, DivesiteSerializer
+from images.models import UserProfileImage
+from images.serializers import UserProfileImageSerializer
 
 
 class FeedPaginator(pagination.LimitOffsetPagination):
@@ -69,8 +71,6 @@ class ProfileViewSet(viewsets.GenericViewSet,
         (a) the actor
         """
         user = request.user
-        #stream = Action.objects.all()
-        #qs = stream.filter(actor_object_id=user.id)
         qs = user_stream(user, with_user_activity=True)
         # Paginate the queryset
         paginator = FeedPaginator()
@@ -118,8 +118,26 @@ class ProfileViewSet(viewsets.GenericViewSet,
         return paginated_response
 
     @detail_route(methods=['get'])
+    def images(self, request, pk):
+        profile = get_object_or_404(Profile.objects.all(), pk=pk)
+
+
+    @detail_route(methods=['get'])
     def minimal(self, request, pk):
         # Just get user name and ID
         profile = get_object_or_404(Profile.objects.all(), pk=pk)
         serializer = MinimalProfileSerializer(profile)
         return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def profile_image(self, request, pk):
+        profile = get_object_or_404(Profile.objects.all(), pk=pk)
+        user = profile.user
+        # Look for a profile image; if one exists, then return it,
+        # otherwise return no content
+        try:
+            image = UserProfileImage.objects.get(user=user)
+            serializer = UserProfileImageSerializer(image)
+            return Response(serializer.data)
+        except UserProfileImage.DoesNotExist:
+            return Response({}, status=status.HTTP_204_NO_CONTENT, content_type='json')
