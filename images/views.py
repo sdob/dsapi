@@ -21,7 +21,6 @@ class ImageViewSet(viewsets.ModelViewSet):
             # raise PermissionDenied()
 
     def perform_create(self, serializer):
-        print('PERFORM_CREATE')
         # Set the owner as the requesting user
         owner = self.request.user
         # Save the instance
