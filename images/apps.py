@@ -6,7 +6,4 @@ class ImagesConfig(AppConfig):
 
     def ready(self):
         from actstream import registry
-        registry.register(self.get_model('CompressorImage'))
-        registry.register(self.get_model('DivesiteImage'))
-        registry.register(self.get_model('SlipwayImage'))
-        registry.register(self.get_model('UserProfileImage'))
+        registry.register(self.get_model('Image'))

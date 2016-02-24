@@ -30,10 +30,6 @@ router.register(r'comments/compressors', comments.views.CompressorCommentViewSet
 router.register(r'comments/divesites', comments.views.DivesiteCommentViewSet)
 router.register(r'comments/slipways', comments.views.SlipwayCommentViewSet)
 
-router.register(r'images/compressors', images.views.CompressorImageViewSet)
-router.register(r'images/divesites', images.views.DivesiteImageViewSet)
-router.register(r'images/slipways', images.views.SlipwayImageViewSet)
-
 router.register(r'compressors', divesites.views.CompressorViewSet)
 router.register(r'divesites', divesites.views.DivesiteViewSet)
 router.register(r'dives', divesites.views.DiveViewSet)
