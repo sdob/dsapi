@@ -32,7 +32,7 @@ class SanityCheckTestCase(APITestCase):
         # Divesite knows about this image
         self.assertIn(i, self.divesite.images.all())
 
-    def test_there_can_be_only_one(self):
+    def test_there_can_be_only_one_header_image(self):
         pass
 
 
