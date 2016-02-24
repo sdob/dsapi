@@ -22,6 +22,7 @@ class DivesiteViewSet(viewsets.ModelViewSet):
     serializer_class = DivesiteSerializer
 
     def perform_create(self, serializer):
+        # Get the user from the request
         user = self.request.user
         instance = serializer.save(owner=user)
 
@@ -32,12 +33,14 @@ class DivesiteViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['get'])
     def comments(self, request, pk):
+        # Return comments on this divesite
         queryset = DivesiteComment.objects.filter(divesite=self.get_object())
         serializer = DivesiteCommentSerializer(queryset, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['get'])
     def dives(self, request, pk):
+        # Return dives at this divesite
         divesite = self.get_object()
         queryset = Dive.objects.filter(divesite=divesite)
         # Use DiveListSerializer since we don't need more than a
@@ -47,6 +50,7 @@ class DivesiteViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['get'])
     def images(self, request, pk):
+        # Return images for this divesite
         divesite = self.get_object()
         queryset = DivesiteImage.objects.filter(divesite=divesite)
         serializer = DivesiteImageSerializer(queryset, many=True)
@@ -54,6 +58,7 @@ class DivesiteViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['get'])
     def nearby_slipways(self, request, pk):
+        # Return nearby slipways for this divesite
         NEARBY_SLIPWAY_KM_LIMIT = 15
         # XXX: this is going to hit the DB for *all* slipways, then
         # sort them on haversine, then return the top n results.
@@ -73,13 +78,13 @@ class DivesiteViewSet(viewsets.ModelViewSet):
                 (divesite.latitude, divesite.longitude),
                 (slipway.latitude, slipway.longitude)
                     ) <= NEARBY_SLIPWAY_KM_LIMIT]
-        # TODO: sort on Haversine distance
         serializer = SlipwaySerializer(slipways, many=True)
         return Response(serializer.data)
 
 
 class DiveViewSet(viewsets.GenericViewSet,
-        # Don't mix in ListModelMixin: we don't want an API endpoint for it
+        # Don't mix in ListModelMixin: we don't want an API endpoint for
+        # it (there's no use-case for 'list all dives')
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
         mixins.UpdateModelMixin,
@@ -90,7 +95,9 @@ class DiveViewSet(viewsets.GenericViewSet,
     serializer_class = DiveSerializer
 
     def perform_create(self, serializer):
+        # Get the divesite instance from the request
         divesite = Divesite.objects.get(id=self.request.data['divesite'])
+        # Get the user from the request
         user = self.request.user
         # Unless we explicitly set the divesite ID here, we get an IntegrityError (?)
         instance = serializer.save(diver=user, divesite=divesite)
@@ -102,18 +109,21 @@ class CompressorViewSet(viewsets.ModelViewSet):
     serializer_class = CompressorSerializer
 
     def perform_create(self, serializer):
+        # Get the user from the request
         owner = self.request.user
         # Save the instance
         instance = serializer.save(owner=owner)
 
     @detail_route(methods=['get'])
     def comments(self, request, pk):
+        # Return comments on this compressor
         queryset = CompressorComment.objects.filter(compressor=self.get_object())
         serializer = CompressorCommentSerializer(queryset, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['get'])
     def images(self, request, pk):
+        # Return images for this compressor
         compressor = self.get_object()
         queryset = CompressorImage.objects.filter(compressor=compressor)
         serializer = CompressorImageSerializer(queryset, many=True)
@@ -126,6 +136,7 @@ class SlipwayViewSet(viewsets.ModelViewSet):
     serializer_class = SlipwaySerializer
 
     def perform_create(self, serializer):
+        # Get the user from the request
         owner = self.request.user
         # Save the instance
         instance = serializer.save(owner=owner)
