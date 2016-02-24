@@ -56,9 +56,23 @@ class ImageRetrievalTestCase(APITestCase):
     def test_can_post_images(self, mock):
         u2 = UserFactory()
         self.client.force_authenticate(u2)
+        response = self.client.post(reverse('compressor-image-list', args=[self.compressor.id]), {
+            'content_type': COMPRESSOR_CTID,
+            'object_id': self.compressor.id,
+            'image': self.image
+            })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
         response = self.client.post(reverse('divesite-image-list', args=[self.divesite.id]), {
             'content_type': DIVESITE_CTID,
             'object_id': self.divesite.id,
+            'image': self.image
+            })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.client.post(reverse('slipway-image-list', args=[self.slipway.id]), {
+            'content_type': SLIPWAY_CTID,
+            'object_id': self.slipway.id,
             'image': self.image
             })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
