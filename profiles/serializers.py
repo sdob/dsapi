@@ -98,7 +98,6 @@ class ProfileSerializer(serializers.ModelSerializer):
 # Generic related field for django-activity-stream objects.
 class GenericRelatedField(serializers.Field):
     def to_representation(self, value):
-        print('serializing a %s' % value.__class__)
         if isinstance(value, Profile):
             return MinimalProfileSerializer(value).data
         if isinstance(value, User):
