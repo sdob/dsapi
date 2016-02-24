@@ -54,6 +54,54 @@ class ImageRetrievalTestCase(APITestCase):
 
 
 @patch('cloudinary.uploader.call_api')
+class HeaderImageRetrievalCase(APITestCase):
+
+    def setUp(self):
+        self.image = File(open(os.path.join(settings.BASE_DIR, 'test.jpg'), 'rb'))
+        self.owner = UserFactory()
+        self.compressor = CompressorFactory(owner=self.owner)
+        self.divesite = DivesiteFactory(owner=self.owner)
+        self.slipway = SlipwayFactory(owner=self.owner)
+
+    def test_can_retrieve_divesite_image(self, mock):
+        self.client.force_authenticate(self.owner)
+
+        # Divesites
+        response = self.client.post(reverse('divesiteimage-list'), {
+            'divesite': self.divesite.id,
+            'image': self.image,
+            'is_header_image': True
+            })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.get(reverse('divesite-header', args=[self.divesite.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Compressors
+        response = self.client.post(reverse('compressorimage-list'), {
+            'compressor': self.compressor.id,
+            'image': self.image,
+            'is_header_image': True
+            })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.get(reverse('compressor-header', args=[self.compressor.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Slipways
+        response = self.client.post(reverse('slipwayimage-list'), {
+            'slipway': self.slipway.id,
+            'image': self.image,
+            'is_header_image': True
+            })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.get(reverse('slipway-header', args=[self.slipway.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_returns_204_when_no_image(self, mock):
+        response = self.client.get(reverse('divesite-header', args=[self.divesite.id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+@patch('cloudinary.uploader.call_api')
 class ImageCreateTestCase(APITestCase):
 
     def setUp(self):

@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from haversine import haversine
 from rest_framework import mixins
 from rest_framework import viewsets
+from rest_framework import status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
@@ -47,6 +48,17 @@ class DivesiteViewSet(viewsets.ModelViewSet):
         # MinimalProfileSerializer and a primary key for the divesite
         serializer = DiveListSerializer(queryset, many=True)
         return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def header(self, request, pk):
+        # Return this site's header (if it exists)
+        divesite = self.get_object()
+        try:
+            image = DivesiteImage.objects.get(divesite=divesite, is_header_image=True)
+            serializer = DivesiteImageSerializer(image)
+            return Response(serializer.data)
+        except DivesiteImage.DoesNotExist:
+            return Response({}, status=status.HTTP_204_NO_CONTENT, content_type='json')
 
     @detail_route(methods=['get'])
     def images(self, request, pk):
@@ -122,6 +134,17 @@ class CompressorViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @detail_route(methods=['get'])
+    def header(self, request, pk):
+        # Return this site's header (if it exists)
+        compressor = self.get_object()
+        try:
+            image = CompressorImage.objects.get(compressor=compressor, is_header_image=True)
+            serializer = CompressorImageSerializer(image)
+            return Response(serializer.data)
+        except CompressorImage.DoesNotExist:
+            return Response({}, status=status.HTTP_204_NO_CONTENT, content_type='json')
+
+    @detail_route(methods=['get'])
     def images(self, request, pk):
         # Return images for this compressor
         compressor = self.get_object()
@@ -146,6 +169,17 @@ class SlipwayViewSet(viewsets.ModelViewSet):
         queryset = SlipwayComment.objects.filter(slipway=self.get_object())
         serializer = SlipwayCommentSerializer(queryset, many=True)
         return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def header(self, request, pk):
+        # Return this site's header (if it exists)
+        slipway = self.get_object()
+        try:
+            image = SlipwayImage.objects.get(slipway=slipway, is_header_image=True)
+            serializer = SlipwayImageSerializer(image)
+            return Response(serializer.data)
+        except SlipwayImage.DoesNotExist:
+            return Response({}, status=status.HTTP_204_NO_CONTENT, content_type='json')
 
     @detail_route(methods=['get'])
     def images(self, request, pk):
