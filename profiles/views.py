@@ -5,9 +5,11 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework import exceptions
 from rest_framework import mixins
 from rest_framework import pagination
+from rest_framework import permissions
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, detail_route, list_route, permission_classes
+from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from .models import Profile
@@ -15,8 +17,8 @@ from .permissions import IsProfileOwnerOrReadOnly
 from .serializers import MinimalProfileSerializer, OwnProfileSerializer, ProfileSerializer, ActionSerializer
 from divesites.models import Dive, Divesite
 from divesites.serializers import DiveSerializer, DiveListSerializer, DivesiteSerializer
-from images.models import Image
-from images.serializers import ImageSerializer
+from images.models import Image, UserProfileImage
+from images.serializers import ImageSerializer, UserProfileImageSerializer
 
 
 class FeedPaginator(pagination.LimitOffsetPagination):
@@ -131,3 +133,37 @@ class ProfileViewSet(viewsets.GenericViewSet,
         profile = get_object_or_404(Profile.objects.all(), pk=pk)
         serializer = MinimalProfileSerializer(profile)
         return Response(serializer.data)
+
+    @detail_route(methods=['get', 'post', 'delete'], permission_classes=[IsAuthenticatedOrReadOnly],)
+    def profile_image(self, request, pk):
+        if not request.method in permissions.SAFE_METHODS:
+            if not request.user.is_authenticated():
+                raise NotAuthenticated()
+            if not str(request.user.profile.id) == pk:
+                raise PermissionDenied()
+
+        profile = get_object_or_404(Profile.objects.all(), pk=pk)
+
+        if request.method == 'GET':
+            try:
+                image = UserProfileImage.objects.get(user__profile=profile)
+                serializer = UserProfileImageSerializer(image)
+                return Response(serializer.data)
+            except UserProfileImage.DoesNotExist:
+                return Response({}, status=status.HTTP_204_NO_CONTENT, content_type='json')
+
+        if request.method == 'POST':
+            # Delete any existing profile image
+            try:
+                UserProfileImage.objects.get(user=profile.user).delete()
+            except UserProfileImage.DoesNotExist:
+                pass
+            # Create a new one
+            UserProfileImage.objects.create(user=profile.user, image=request.data['image'])
+            image = UserProfileImage.objects.get(user__profile=profile)
+            serializer = UserProfileImageSerializer(image)
+            return Response(serializer.data)
+
+        if request.method == 'DELETE':
+            UserProfileImage.objects.filter(user__profile=profile).delete()
+            return Response({}, status=status.HTTP_204_NO_CONTENT, content_type='json')
