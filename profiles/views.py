@@ -15,6 +15,8 @@ from .permissions import IsProfileOwnerOrReadOnly
 from .serializers import MinimalProfileSerializer, OwnProfileSerializer, ProfileSerializer, ActionSerializer
 from divesites.models import Dive, Divesite
 from divesites.serializers import DiveSerializer, DiveListSerializer, DivesiteSerializer
+from images.models import Image
+from images.serializers import ImageSerializer
 
 
 class FeedPaginator(pagination.LimitOffsetPagination):
@@ -118,6 +120,9 @@ class ProfileViewSet(viewsets.GenericViewSet,
     @detail_route(methods=['get'])
     def images(self, request, pk):
         profile = get_object_or_404(Profile.objects.all(), pk=pk)
+        images = Image.objects.filter(owner=profile.user).order_by('-creation_date')
+        serializer = ImageSerializer(images, many=True)
+        return Response(serializer.data)
 
 
     @detail_route(methods=['get'])
