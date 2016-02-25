@@ -77,6 +77,21 @@ class ImageRetrievalTestCase(APITestCase):
             })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_can_retrieve_user_images(self, mock):
+        response = self.client.get(reverse('profile-images', args=[self.owner.profile.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, list)
+        self.assertEqual(len(response.data), 0)
+        num_images = 5
+        for _ in range(num_images):
+            i = Image(content_object=self.divesite, owner=self.owner)
+            i.save()
+        response = self.client.get(reverse('profile-images', args=[self.owner.profile.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, list)
+        self.assertEqual(len(response.data), num_images)
+        print(response.data[0])
+
 
 @patch('cloudinary.uploader.call_api')
 class HeaderImageRetrievalCase(APITestCase):
