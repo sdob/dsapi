@@ -11,3 +11,5 @@ class ImageSerializer(serializers.ModelSerializer):
 class UserProfileImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfileImage
+        exclude = ('user', 'id',)
+    public_id = serializers.CharField(source='image.public_id', read_only=True)
