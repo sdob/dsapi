@@ -1,7 +1,9 @@
 import uuid
+from actstream import action
 from cloudinary.models import CloudinaryField
 from django.db import models
 from django.db.models import Q
+from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -61,3 +63,10 @@ class UserProfileImage(models.Model):
     image = CloudinaryField('image')
     user = models.OneToOneField(User, related_name='profile_image')
     creation_date = models.DateTimeField(auto_now_add=True)
+
+
+def send_image_creation_action(sender, instance, created, **kwargs):
+    if created:
+        verb = 'added an image'
+        action.send(instance.owner, verb=verb, action_object=instance, target=instance.content_object)
+post_save.connect(send_image_creation_action, sender=Image)
