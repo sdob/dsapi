@@ -95,9 +95,6 @@ class Dive(models.Model):
     # Creation metadata
     creation_date = models.DateTimeField(auto_now_add=True)
 
-    # images, through a generic relation
-    images = GenericRelation('images.Image')
-
     def clean(self):
         return super(Dive, self).clean()
 
@@ -121,6 +118,9 @@ class Compressor(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
     # Geocoding data
     geocoding_data = models.TextField(blank=True)
+
+    # images, through a generic relation
+    images = GenericRelation('images.Image')
 
     def save(self, *args, **kwargs):
         # Try to retrieve geocoding data from Google
