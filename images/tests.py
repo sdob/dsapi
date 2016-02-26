@@ -92,6 +92,34 @@ class ImageRetrievalTestCase(APITestCase):
         self.assertEqual(len(response.data), num_images)
         print(response.data[0])
 
+    def test_can_delete_own_images(self, mock):
+        u2 = UserFactory()
+        self.client.force_authenticate(u2)
+        response = self.client.post(reverse('compressor-image-list', args=[self.compressor.id]), {
+            'content_type': COMPRESSOR_CTID,
+            'object_id': self.compressor.id,
+            'image': self.image
+            })
+        image_id = response.data['id']
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.delete(reverse('compressor-image-detail', args=[self.compressor.id, image_id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_cant_delete_others_images(self, mock):
+        u2 = UserFactory()
+        self.client.force_authenticate(u2)
+        response = self.client.post(reverse('compressor-image-list', args=[self.compressor.id]), {
+            'content_type': COMPRESSOR_CTID,
+            'object_id': self.compressor.id,
+            'image': self.image
+            })
+        image_id = response.data['id']
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.client.logout()
+        self.client.force_authenticate(self.owner)
+        response = self.client.delete(reverse('compressor-image-detail', args=[self.compressor.id, image_id]))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 
 @patch('cloudinary.uploader.call_api')
 class HeaderImageRetrievalCase(APITestCase):
