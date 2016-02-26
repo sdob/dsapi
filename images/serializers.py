@@ -6,6 +6,7 @@ class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
     owner = MinimalProfileSerializer(source='owner.profile', read_only=True)
+    public_id = serializers.CharField(source='image.public_id', read_only=True)
 
 
 class UserProfileImageSerializer(serializers.ModelSerializer):
