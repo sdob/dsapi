@@ -17,38 +17,7 @@ from comments.serializers import DivesiteCommentSerializer, CompressorCommentSer
 from images.models import Image
 from images.serializers import ImageSerializer
 
-class DivesiteViewSet(viewsets.ModelViewSet):
-
-    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
-    queryset = Divesite.objects.all()
-    serializer_class = DivesiteSerializer
-
-    def perform_create(self, serializer):
-        # Get the user from the request
-        user = self.request.user
-        instance = serializer.save(owner=user)
-
-    def list(self, request):
-        queryset = self.get_queryset()
-        serializer = DivesiteListSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    @detail_route(methods=['get'])
-    def comments(self, request, pk):
-        # Return comments on this divesite
-        queryset = DivesiteComment.objects.filter(divesite=self.get_object())
-        serializer = DivesiteCommentSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    @detail_route(methods=['get'])
-    def dives(self, request, pk):
-        # Return dives at this divesite
-        divesite = self.get_object()
-        queryset = Dive.objects.filter(divesite=divesite)
-        # Use DiveListSerializer since we don't need more than a
-        # MinimalProfileSerializer and a primary key for the divesite
-        serializer = DiveListSerializer(queryset, many=True)
-        return Response(serializer.data)
+class BaseSiteViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['get', 'post', 'delete'])
     def header_image(self, request, pk):
@@ -101,6 +70,40 @@ class DivesiteViewSet(viewsets.ModelViewSet):
                 raise NotFound()
 
 
+class DivesiteViewSet(BaseSiteViewSet):
+
+    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
+    queryset = Divesite.objects.all()
+    serializer_class = DivesiteSerializer
+
+    def perform_create(self, serializer):
+        # Get the user from the request
+        user = self.request.user
+        instance = serializer.save(owner=user)
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = DivesiteListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def comments(self, request, pk):
+        # Return comments on this divesite
+        queryset = DivesiteComment.objects.filter(divesite=self.get_object())
+        serializer = DivesiteCommentSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def dives(self, request, pk):
+        # Return dives at this divesite
+        divesite = self.get_object()
+        queryset = Dive.objects.filter(divesite=divesite)
+        # Use DiveListSerializer since we don't need more than a
+        # MinimalProfileSerializer and a primary key for the divesite
+        serializer = DiveListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
     @detail_route(methods=['get'])
     def nearby_slipways(self, request, pk):
         # Return nearby slipways for this divesite
@@ -148,7 +151,7 @@ class DiveViewSet(viewsets.GenericViewSet,
         instance = serializer.save(diver=user, divesite=divesite)
 
 
-class CompressorViewSet(viewsets.ModelViewSet):
+class CompressorViewSet(BaseSiteViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
     queryset = Compressor.objects.all()
     serializer_class = CompressorSerializer
@@ -167,7 +170,7 @@ class CompressorViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class SlipwayViewSet(viewsets.ModelViewSet):
+class SlipwayViewSet(BaseSiteViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
     queryset = Slipway.objects.all()
     serializer_class = SlipwaySerializer
