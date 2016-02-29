@@ -6,6 +6,7 @@ from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.decorators import detail_route, list_route
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from .serializers import CompressorSerializer, DiveSerializer, DiveListSerializer,  DivesiteSerializer, DivesiteListSerializer, SlipwaySerializer
@@ -48,6 +49,57 @@ class DivesiteViewSet(viewsets.ModelViewSet):
         # MinimalProfileSerializer and a primary key for the divesite
         serializer = DiveListSerializer(queryset, many=True)
         return Response(serializer.data)
+
+    @detail_route(methods=['get', 'post', 'delete'])
+    def header_image(self, request, pk):
+        # Permissions here should be handled by the viewset's permission_classes
+
+        site = self.get_object()
+
+        if request.method == 'DELETE':
+            # Find an image for this site that is currently flagged as a header
+            # image, unflag it, and save
+            try:
+                image = site.images.get(is_header_image=True)
+                image.is_header_image = False
+                image.save()
+            except Image.DoesNotExist:
+                pass
+            return Response({}, status=status.HTTP_200_OK)
+
+        if request.method == 'GET':
+            # Look for an image with is_header_image set to True, and return
+            # it if it exists; otherwise, return an empty object and HTTP 204.
+            try:
+                image = site.images.get(is_header_image=True)
+                serializer = ImageSerializer(image)
+                return Response(serializer.data)
+            except Image.DoesNotExist:
+                # This is not a problem; we expect a call to get /header_image/
+                # for every divesite. (In fact we expect them so frequently that
+                # we should probably send it when we serialize a divesite.)
+                return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+        if request.method == 'POST':
+            site = self.get_object()
+            # Look for the image associated with this site with the ID in
+            # the post body and set it as the header image. The task of
+            # ensuring that only one image is a header is performed at
+            # the model level.
+            try:
+                image = site.images.get(id=request.data['id'])
+                image.is_header_image = True
+                image.save()
+                # As a courtesy, return the serialized version of this
+                # image to the caller
+                serializer = ImageSerializer(image)
+                return Response(serializer.data)
+            except Image.DoesNotExist:
+                # This is definitely a client error; you shouldn't be
+                # trying to set an image that doesn't belong to this
+                # site as its header.
+                raise NotFound()
+
 
     @detail_route(methods=['get'])
     def nearby_slipways(self, request, pk):
