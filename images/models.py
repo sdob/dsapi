@@ -57,6 +57,25 @@ class Image(models.Model):
     # but only by the site's owner
     is_header_image = models.BooleanField(default=False)
 
+    def save(self, *args, **kwargs):
+        if self.is_header_image:
+            # First we need to check whether there is an existing header
+            # image for this image's content object
+            try:
+                # If we find something, then unset its is_header_image
+                # flag and save before proceeding
+                old_header_image = self.content_object.images.get(is_header_image=True)
+                if old_header_image != self:
+                    old_header_image.is_header_image = False
+                    old_header_image.save()
+            except Image.DoesNotExist:
+                # If we find nothing, then we're OK
+                pass
+        # Either way, call our superclass method to actually
+        # perform the save
+        super(Image, self).save(*args, **kwargs)
+
+
 
 class UserProfileImage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
