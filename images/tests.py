@@ -131,11 +131,12 @@ class HeaderImageRetrievalCase(APITestCase):
         self.slipway = SlipwayFactory(owner=self.owner)
 
     def test_can_retrieve_site_header_image(self, mock):
+        i = Image.objects.create(
+                content_object=self.divesite,
+                owner=self.owner,
+                is_header_image=True
+                )
         self.client.force_authenticate(self.owner)
-        response = self.client.post(reverse('divesite-header-image', args=[self.divesite.id]), {
-            'image': self.image
-            })
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response = self.client.get(reverse('divesite-header-image', args=[self.divesite.id]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -145,21 +146,49 @@ class HeaderImageRetrievalCase(APITestCase):
 
 
 @patch('cloudinary.uploader.call_api')
-class ImageCreateTestCase(APITestCase):
+class HeaderImageSetTestCase(APITestCase):
 
     def setUp(self):
-        self.image = File(open(os.path.join(settings.BASE_DIR, 'test.jpg'), 'rb'))
         self.owner = UserFactory()
         self.compressor = CompressorFactory(owner=self.owner)
         self.divesite = DivesiteFactory(owner=self.owner)
         self.slipway = SlipwayFactory(owner=self.owner)
+        self.u2 = UserFactory()
+        self.image = Image.objects.create(
+                content_object=self.divesite,
+                owner=self.u2
+                )
 
     def test_site_owner_can_set_header_image(self, mock):
         self.client.force_authenticate(self.owner)
-        pass
+        response = self.client.post(reverse('divesite-header-image', args=[self.divesite.id]), {
+            'id': self.image.id,
+            })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_only_site_owner_can_set_header_image(self, mock):
-        pass
+        self.client.force_authenticate(self.u2)
+        response = self.client.post(reverse('divesite-header-image', args=[self.divesite.id]), {
+            'id': self.image.id,
+            })
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_only_site_owner_can_set_header_image_in_update(self, mock):
-        pass
+    def test_unauthenticated_user_cannot_set_header_image(self, mock):
+        response = self.client.post(reverse('divesite-header-image', args=[self.divesite.id]), {
+            'id': self.image.id,
+            })
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_site_owner_can_clear_header_image(self, mock):
+        self.client.force_authenticate(self.owner)
+        response = self.client.delete(reverse('divesite-header-image', args=[self.divesite.id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_only_site_owner_can_set_header_image(self, mock):
+        self.client.force_authenticate(self.u2)
+        response = self.client.delete(reverse('divesite-header-image', args=[self.divesite.id]))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_unauthenticated_user_cannot_set_header_image(self, mock):
+        response = self.client.delete(reverse('divesite-header-image', args=[self.divesite.id]))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
