@@ -34,7 +34,7 @@ class BaseSiteViewSet(viewsets.ModelViewSet):
                 image.save()
             except Image.DoesNotExist:
                 pass
-            return Response({}, status=status.HTTP_200_OK)
+            return Response({}, status=status.HTTP_204_NO_CONTENT)
 
         if request.method == 'GET':
             # Look for an image with is_header_image set to True, and return
