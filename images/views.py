@@ -18,8 +18,9 @@ class ImageViewSet(viewsets.ModelViewSet):
     serializer_class = ImageSerializer
 
     def check_ownership(self, obj):
-        if 'is_header_image' in request.data:
-            user = self.request.user
+        user = self.request.user
+        if user != obj.owner:
+            raise PermissionDenied()
 
 
     def create(self, request, *args, **kwargs):
@@ -31,21 +32,22 @@ class ImageViewSet(viewsets.ModelViewSet):
             obj = Slipway.objects.get(id=kwargs['slipway_pk'])
         if not obj:
             raise NotFound()
-        # Add this in when everything else is functioning OK
-        #self.check_ownership(obj)
-        # Add to request
-        print(request.data['image'])
-        data = dict(request.data)
-        data['content_type'] = ContentType.objects.get_for_model(obj).id
-        data['object_id'] = obj.id
-        image = Image.objects.create(
+
+        # Build image and save it
+        image = Image(
                 content_object=obj,
                 content_type=ContentType.objects.get_for_model(obj),
-                image = request.data['image'],
-                object_id = obj.id,
+                image=request.data['image'],
+                object_id=obj.id,
                 owner=self.request.user,
                 )
-        print(image)
+        if 'caption' in request.data:
+            image.caption = request.data['caption']
+        if 'is_header_image' in request.data:
+            print('checking is_header_image')
+            self.check_ownership(obj)
+            image.is_header_image = request.data['is_header_image']
+        image.save()
         serializer = ImageSerializer(image)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -55,15 +57,12 @@ class ImageViewSet(viewsets.ModelViewSet):
     def list(self, request, divesite_pk=None, slipway_pk=None, compressor_pk=None):
         images = Image.objects.none()
         if compressor_pk is not None:
-            print('looking for images for compressor with pk: %s' % compressor_pk)
             obj = Compressor.objects.get(id=compressor_pk)
             images = obj.images.all()
         elif divesite_pk is not None:
-            print('looking for images for divesite with pk: %s' % divesite_pk)
             obj = Divesite.objects.get(id=divesite_pk)
             images = obj.images.all()
         elif slipway_pk is not None:
-            print('looking for images for slipway with pk: %s' % slipway_pk)
             obj = Slipway.objects.get(id=slipway_pk)
         if obj:
             images = obj.images.all()

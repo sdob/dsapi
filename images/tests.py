@@ -90,7 +90,6 @@ class ImageRetrievalTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response.data, list)
         self.assertEqual(len(response.data), num_images)
-        print(response.data[0])
 
     def test_can_delete_own_images(self, mock):
         u2 = UserFactory()
@@ -131,11 +130,18 @@ class HeaderImageRetrievalCase(APITestCase):
         self.divesite = DivesiteFactory(owner=self.owner)
         self.slipway = SlipwayFactory(owner=self.owner)
 
-    def test_can_retrieve_divesite_image(self, mock):
-        pass
+    def test_can_retrieve_site_header_image(self, mock):
+        self.client.force_authenticate(self.owner)
+        response = self.client.post(reverse('divesite-header-image', args=[self.divesite.id]), {
+            'image': self.image
+            })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.get(reverse('divesite-header-image', args=[self.divesite.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_returns_204_when_no_image(self, mock):
-        pass
+        response = self.client.get(reverse('divesite-header-image', args=[self.divesite.id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 
 @patch('cloudinary.uploader.call_api')
