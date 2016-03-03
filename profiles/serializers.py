@@ -121,7 +121,6 @@ class GenericRelatedField(serializers.Field):
             return UnattributedDivesiteSerializer(value).data
         if isinstance(value, Slipway):
             return UnattributedSlipwaySerializer(value).data
-        print('couldn\'t grab it by value tho')
         return str(value)
 
 
