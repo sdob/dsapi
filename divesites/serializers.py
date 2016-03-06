@@ -53,7 +53,8 @@ class DivesiteDistanceValidator(object):
 class DiveSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Dive
-        fields = ('comment', 'diver', 'id', 'depth', 'duration', 'divesite', 'date', 'time',)
+        fields = ('comment', 'diver', 'id', 'depth', 'duration', 'divesite',
+                'date', 'time', 'air_temperature', 'water_temperature',)
     # Provide at least ID and name attributes for the diver
     diver = MinimalProfileSerializer(source='diver.profile', read_only=True)
 
@@ -72,7 +73,8 @@ class DiveSerializer(serializers.ModelSerializer):
 class DiveListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Dive
-        fields = ('id', 'comment', 'depth', 'duration', 'date', 'time', 'divesite', 'diver',)
+        fields = ('id', 'comment', 'depth', 'duration', 'date', 'time', 'divesite', 'diver',
+                'air_temperature', 'water_temperature',)
     diver = MinimalProfileSerializer(source='diver.profile', read_only=True)
     divesite = serializers.PrimaryKeyRelatedField(read_only=True)
 

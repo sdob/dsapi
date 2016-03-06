@@ -95,6 +95,18 @@ class Dive(models.Model):
     # Creation metadata
     creation_date = models.DateTimeField(auto_now_add=True)
 
+    # Cylinder size and pressure. We could do model-level checking that
+    # these are non-negative, but that's for the future. Note that this
+    # model assumes single-tank diving (or at least forces divers to do
+    # the maths for multiple tanks...
+    cylinder_capacity = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
+    air_in = models.IntegerField(blank=True, null=True)
+    air_out = models.IntegerField(blank=True, null=True)
+
+    # Conditions
+    air_temperature = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
+    water_temperature = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
+
     def clean(self):
         return super(Dive, self).clean()
 
