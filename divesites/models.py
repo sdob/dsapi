@@ -5,6 +5,7 @@ from actstream import action
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save
@@ -106,6 +107,10 @@ class Dive(models.Model):
     # Conditions
     air_temperature = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
     water_temperature = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
+
+    # Gas mix --- this is implemented as JSON (since it could be air,
+    # Nitrox, trimix, or potentially something more complex)
+    gas_mix = JSONField(blank=True, null=True)
 
     def clean(self):
         return super(Dive, self).clean()
