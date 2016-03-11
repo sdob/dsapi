@@ -13,9 +13,15 @@ from dsapi import settings
 
 from images.models import Image
 
-COMPRESSOR_CTID = ContentType.objects.get_for_model(Compressor).id
-DIVESITE_CTID = ContentType.objects.get_for_model(Divesite).id
-SLIPWAY_CTID = ContentType.objects.get_for_model(Slipway).id
+#COMPRESSOR_CTID = ContentType.objects.get_for_model(Compressor).id
+#DIVESITE_CTID = ContentType.objects.get_for_model(Divesite).id
+#SLIPWAY_CTID = ContentType.objects.get_for_model(Slipway).id
+
+# These *may* be constant across migrations, so, let's see if it
+# sorts the Travis weirdness
+DIVESITE_CTID = 19
+COMPRESSOR_CTID = 18
+SLIPWAY_CTID = 17
 
 # Create your tests here.
 class SanityCheckTestCase(APITestCase):
