@@ -100,8 +100,8 @@ class Dive(models.Model):
     # model assumes single-tank diving (or at least forces divers to do
     # the maths for multiple tanks...
     cylinder_capacity = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
-    air_in = models.IntegerField(blank=True, null=True)
-    air_out = models.IntegerField(blank=True, null=True)
+    pressure_in = models.IntegerField(blank=True, null=True)
+    pressure_out = models.IntegerField(blank=True, null=True)
 
     # Conditions
     air_temperature = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
