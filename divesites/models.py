@@ -27,6 +27,13 @@ def retrieve_geocoding_data(lat, lng):
 
 class Divesite(models.Model):
 
+    BOULDERS = 'Blds'
+    CLAY = 'Cl'
+    CORAL = 'Co'
+    MUD = 'M'
+    ROCKY = 'Rk'
+    SAND = 'S'
+
     def __str__(self):
         return self.name
 
@@ -41,6 +48,15 @@ class Divesite(models.Model):
         (1, 'Intermediate',),
         (2, 'Advanced',),
         ))
+    # Other site data, not worth filtering on
+    bottom_type = models.SmallIntegerField(choices=(
+        (BOULDERS, 'Boulders'),
+        (CLAY, 'Clay'),
+        (CORAL, 'Coral'),
+        (MUD, 'Mud'),
+        (ROCKY, 'Rocky'),
+        (SAND, 'Sand'),
+        ), blank=True, null=True)
     # For site depth, use the mean of the dives logged at this site, or
     # return 0 as a default if nobody's logged a dive here.
     def get_average_maximum_depth(self):
