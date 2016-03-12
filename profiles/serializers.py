@@ -35,6 +35,7 @@ class UnattributedDiveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dive
         fields = ('id', 'depth', 'duration', 'comment', 'date', 'time', 'divesite',
+                'cylinder_capacity', 'pressure_in', 'pressure_out', 'gas_mix',
                 'air_temperature', 'water_temperature',)
     divesite = UnattributedDivesiteSerializer()
 

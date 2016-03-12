@@ -54,7 +54,10 @@ class DiveSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Dive
         fields = ('comment', 'diver', 'id', 'depth', 'duration', 'divesite',
-                'date', 'time', 'air_temperature', 'water_temperature',)
+                'date', 'time',
+                'cylinder_capacity', 'pressure_in', 'pressure_out', 'gas_mix',
+                'air_temperature', 'water_temperature',
+                )
     # Provide at least ID and name attributes for the diver
     diver = MinimalProfileSerializer(source='diver.profile', read_only=True)
 
@@ -85,6 +88,7 @@ class DivesiteSerializer(serializers.ModelSerializer):
         model = models.Divesite
         fields = ('depth', 'duration', 'dives', 'name', 'id',
                 'latitude', 'longitude', 'level', 'boat_entry', 'shore_entry',
+                'bottom_type',
                 'description',
                 'owner',
                 'geocoding_data',
@@ -118,7 +122,9 @@ class DivesiteSerializer(serializers.ModelSerializer):
 class DivesiteListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Divesite
-        fields = ('id', 'depth', 'duration', 'geocoding_data', 'level', 'boat_entry', 'shore_entry', 'latitude', 'longitude','name', 'owner',)
+        fields = ('id', 'depth', 'duration', 'geocoding_data', 'level',
+                'boat_entry', 'shore_entry', 'boat_entry',
+                'latitude', 'longitude', 'name', 'owner',)
     depth = serializers.ReadOnlyField(source='get_average_maximum_depth')
     duration = serializers.ReadOnlyField(source='get_average_duration')
     # Give a small amount of information about the owner
