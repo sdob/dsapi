@@ -57,6 +57,7 @@ class DiveSerializer(serializers.ModelSerializer):
                 'date', 'time',
                 'cylinder_capacity', 'pressure_in', 'pressure_out', 'gas_mix',
                 'air_temperature', 'water_temperature',
+                'weather', 'wind',
                 )
     # Provide at least ID and name attributes for the diver
     diver = MinimalProfileSerializer(source='diver.profile', read_only=True)

@@ -123,6 +123,32 @@ class Dive(models.Model):
     # Conditions
     air_temperature = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
     water_temperature = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
+    # Weather conditions are string-based
+    weather = models.CharField(choices=(
+        ('clear', 'Clear'),
+        ('clouds', 'Clouds'),
+        ('rain', 'Rain'),
+        ('fog', 'Fog'),
+        ('snow', 'Snow'),
+        ),
+        max_length=50,
+        blank=True, null=True)
+    # Wind values are Beaufort scale numbers
+    wind = models.SmallIntegerField(choices=(
+        (0, 'Calm'),
+        (1, 'Light air'),
+        (2, 'Light breeze'),
+        (3, 'Gentle breeze'),
+        (4, 'Moderate breeze'),
+        (5, 'Fresh breeze'),
+        (6, 'Strong breeze'),
+        (7, 'High wind'),
+        (8, 'Gale'),
+        (9, 'Strong gale'),
+        (10, 'Storm'),
+        (11, 'Violent storm'),
+        (12, 'Hurricane'),
+        ), blank=True, null=True)
 
     # Gas mix --- this is implemented as JSON (since it could be air,
     # Nitrox, trimix, or potentially something more complex)
