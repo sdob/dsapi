@@ -9,16 +9,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from divesites.models import Compressor, Divesite, Slipway
 
-class BaseImage(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    # Creation metadata
-    owner = models.ForeignKey(User)
-    caption = models.TextField(blank=True)
-    image = CloudinaryField('image')
-    creation_date = models.DateTimeField(auto_now_add=True)
-    # Images can be assigned as the 'header image' of their site
-    is_header_image = models.BooleanField(default=False)
-
 
 class Image(models.Model):
     """
