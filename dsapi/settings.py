@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'profiles', # rich User profiles
     'authviews', # social auth hookups
     'actstream', # Activity stream
+    'sitestatistics', # Site statistics
 ]
 
 MIDDLEWARE_CLASSES = [

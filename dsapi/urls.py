@@ -24,6 +24,7 @@ import comments.views
 import divesites.views
 import images.views
 import profiles.views
+import sitestatistics.views
 from authviews.views import FacebookLogin, GoogleLogin
 
 router = SimpleRouter()
@@ -56,4 +57,5 @@ urlpatterns = [
     url(r'^auth/facebook/$', FacebookLogin.as_view(), name='fb_login'),
     url(r'^auth/google/$', GoogleLogin.as_view(), name='google_login'),
     url(r'^accounts/', include('allauth.socialaccount.urls')),
+    url(r'^statistics/$', sitestatistics.views.site_statistics),
 ]
