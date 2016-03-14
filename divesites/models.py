@@ -15,14 +15,18 @@ from dsapi.settings import GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE
 from .validators import validate_duration, validate_latitude, validate_longitude
 
 def retrieve_geocoding_data(lat, lng):
-        try:
-            url = GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE % (lat, lng)
-            reverse_geocoding_json = urllib.request.urlopen(url).read()
-            return reverse_geocoding_json
-        except:
-            # We might get a URLError or HTTPError, but there's really
-            # nothing we can do about it except log it
-            return None
+    """
+    Contact the Google reverse-geocoding API to retrieve geocoding
+    data for this lat/lng pair.
+    """
+    try:
+        url = GOOGLE_REVERSE_GEOCODING_URL_STRING_TEMPLATE % (lat, lng)
+        reverse_geocoding_json = urllib.request.urlopen(url).read()
+        return reverse_geocoding_json
+    except:
+        # We might get a URLError or HTTPError, but there's really
+        # nothing we can do about it except log it
+        return None
 
 
 class Divesite(models.Model):
@@ -40,6 +44,7 @@ class Divesite(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+
     # Site data for filtering
     boat_entry = models.BooleanField(default=True)
     shore_entry = models.BooleanField(default=True)
@@ -48,6 +53,7 @@ class Divesite(models.Model):
         (1, 'Intermediate',),
         (2, 'Advanced',),
         ))
+
     # Other site data, not worth filtering on
     bottom_type = models.SmallIntegerField(choices=(
         (BOULDERS, 'Boulders'),
@@ -57,6 +63,18 @@ class Divesite(models.Model):
         (ROCKY, 'Rocky'),
         (SAND, 'Sand'),
         ), blank=True, null=True)
+    # Geographical coordinates
+    latitude = models.DecimalField(max_digits=23, decimal_places=20, validators=[validate_latitude])
+    longitude = models.DecimalField(max_digits=23, decimal_places=20, validators=[validate_longitude])
+    # Country and administrative-area data; we'll use the Google reverse-geocoding API to retrieve
+    # these (and store the JSON in a string in the db)
+    geocoding_data = models.TextField(blank=True)
+    # Creation metadata
+    owner = models.ForeignKey(User, related_name="divesites")
+    creation_date = models.DateTimeField(auto_now_add=True)
+    # images, through a generic relation
+    images = GenericRelation('images.Image')
+
     # For site depth, use the mean of the dives logged at this site, or
     # return 0 as a default if nobody's logged a dive here.
     def get_average_maximum_depth(self):
@@ -70,17 +88,6 @@ class Divesite(models.Model):
             dives = self.dives.all()
             return  sum([_.duration.total_seconds() for _ in dives]) // (60 * len(dives))
         return 0
-    # Geographical coordinates
-    latitude = models.DecimalField(max_digits=23, decimal_places=20, validators=[validate_latitude])
-    longitude = models.DecimalField(max_digits=23, decimal_places=20, validators=[validate_longitude])
-    # Country and administrative-area data; we'll use the Google reverse-geocoding API to retrieve
-    # these (and store the JSON in a string in the db)
-    geocoding_data = models.TextField(blank=True)
-    # Creation metadata
-    owner = models.ForeignKey(User, related_name="divesites")
-    creation_date = models.DateTimeField(auto_now_add=True)
-    # images, through a generic relation
-    images = GenericRelation('images.Image')
 
     def clean(self):
         validate_latitude(self.latitude)
@@ -216,7 +223,12 @@ class Slipway(models.Model):
         super(Slipway, self).save(*args, **kwargs)
 
 
+#
 # Post-save signals
+#
+
+# When a user creates a site (a Compressor, Divesite, or Slipway), then
+# generate a corresponding activity stream action.
 def send_site_creation_action(sender, instance, created, **kwargs):
     if created:
         verb = 'created'
@@ -226,6 +238,7 @@ post_save.connect(send_site_creation_action, sender=Compressor)
 post_save.connect(send_site_creation_action, sender=Divesite)
 post_save.connect(send_site_creation_action, sender=Slipway)
 
+# When a user logs a dive, then create a corresponding activity stream action.
 def send_dive_creation_action(sender, instance, created, **kwargs):
     if created:
         verb = 'logged a dive at'
