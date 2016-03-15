@@ -15,11 +15,16 @@ def site_statistics(request):
     dives = Dive.objects.count()
     divesites = Divesite.objects.count()
     images = Image.objects.count()
+    slipways = Slipway.objects.count()
+    total_hours_underwater = int(sum([t[0].seconds for t in Dive.objects.all().values_list('duration')]) / 3600)
     users = Profile.objects.count()
     obj = {
             'compressors': compressors,
             'dives': dives,
             'divesites': divesites,
+            'images': images,
+            'slipways': slipways,
+            'total_hours_underwater': total_hours_underwater,
             'users': users,
             }
     return Response(obj)
