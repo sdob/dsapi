@@ -47,6 +47,9 @@ class Image(models.Model):
     # but only by the site's owner
     is_header_image = models.BooleanField(default=False)
 
+    def get_content_type_model(self):
+        return self.content_type.model
+
     def save(self, *args, **kwargs):
         if self.is_header_image:
             # First we need to check whether there is an existing header

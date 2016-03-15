@@ -7,6 +7,7 @@ class ImageSerializer(serializers.ModelSerializer):
         model = Image
     owner = MinimalProfileSerializer(source='owner.profile', read_only=True)
     public_id = serializers.CharField(source='image.public_id', read_only=True)
+    content_type_model = serializers.ReadOnlyField(source="get_content_type_model")
 
 
 class UserProfileImageSerializer(serializers.ModelSerializer):
