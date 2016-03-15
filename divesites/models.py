@@ -55,14 +55,16 @@ class Divesite(models.Model):
         ))
 
     # Other site data, not worth filtering on
-    bottom_type = models.SmallIntegerField(choices=(
+    seabed = models.CharField(choices=(
         (BOULDERS, 'Boulders'),
         (CLAY, 'Clay'),
         (CORAL, 'Coral'),
         (MUD, 'Mud'),
         (ROCKY, 'Rocky'),
         (SAND, 'Sand'),
-        ), blank=True, null=True)
+        ),
+        max_length=20,
+        blank=True, null=True)
     # Geographical coordinates
     latitude = models.DecimalField(max_digits=23, decimal_places=20, validators=[validate_latitude])
     longitude = models.DecimalField(max_digits=23, decimal_places=20, validators=[validate_longitude])

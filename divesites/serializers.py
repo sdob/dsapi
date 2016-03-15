@@ -89,7 +89,7 @@ class DivesiteSerializer(serializers.ModelSerializer):
         model = models.Divesite
         fields = ('depth', 'duration', 'dives', 'name', 'id',
                 'latitude', 'longitude', 'level', 'boat_entry', 'shore_entry',
-                'bottom_type',
+                'seabed',
                 'description',
                 'owner',
                 'geocoding_data',
