@@ -47,6 +47,26 @@ class ProfileViewSet(viewsets.GenericViewSet,
         # TODO: Return something informative to the client
         return Response({}, status=status.HTTP_200_OK, content_type='json')
 
+    @detail_route(methods=['get'])
+    def followers(self, request, pk):
+        queryset = Profile.objects.all()
+        profile = get_object_or_404(queryset, pk=pk)
+        user = profile.user
+        targets = followers(user)
+        profiles = [_.profile for _ in targets]
+        serializer = ProfileSerializer(profiles, many=True)
+        return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def follows(self, request, pk):
+        queryset = Profile.objects.all()
+        profile = get_object_or_404(queryset, pk=pk)
+        user = profile.user
+        targets = following(user)
+        profiles = [_.profile for _ in targets]
+        serializer = ProfileSerializer(profiles, many=True)
+        return Response(serializer.data)
+
     @detail_route(methods=['post'], permission_classes=[IsAuthenticated])
     def unfollow(self, request, pk):
         # You can't unfollow yourself
