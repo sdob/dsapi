@@ -54,7 +54,7 @@ class ProfileViewSet(viewsets.GenericViewSet,
         user = profile.user
         targets = followers(user)
         profiles = [_.profile for _ in targets]
-        serializer = ProfileSerializer(profiles, many=True)
+        serializer = MinimalProfileSerializer(profiles, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['get'])
@@ -64,7 +64,7 @@ class ProfileViewSet(viewsets.GenericViewSet,
         user = profile.user
         targets = following(user)
         profiles = [_.profile for _ in targets]
-        serializer = ProfileSerializer(profiles, many=True)
+        serializer = MinimalProfileSerializer(profiles, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['post'], permission_classes=[IsAuthenticated])
@@ -107,7 +107,7 @@ class ProfileViewSet(viewsets.GenericViewSet,
         user = request.user
         targets = followers(user)
         target_profiles = [_.profile for _ in targets]
-        serializer = ProfileSerializer(target_profiles, many=True)
+        serializer = MinimalProfileSerializer(target_profiles, many=True)
         return Response(serializer.data)
 
     @list_route(methods=['get'], permission_classes=[IsAuthenticated])
@@ -115,7 +115,7 @@ class ProfileViewSet(viewsets.GenericViewSet,
         user = request.user
         targets = following(user, User)
         target_profiles = [_.profile for _ in targets]
-        serializer = ProfileSerializer(target_profiles, many=True)
+        serializer = MinimalProfileSerializer(target_profiles, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['get'])
