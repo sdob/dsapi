@@ -83,6 +83,14 @@ class ProfileViewSet(viewsets.GenericViewSet,
         return paginated_response
 
     @list_route(methods=['get'], permission_classes=[IsAuthenticated])
+    def my_followers(self, request):
+        user = request.user
+        targets = followers(user)
+        target_profiles = [_.profile for _ in targets]
+        serializer = ProfileSerializer(target_profiles, many=True)
+        return Response(serializer.data)
+
+    @list_route(methods=['get'], permission_classes=[IsAuthenticated])
     def my_follows(self, request):
         user = request.user
         targets = following(user, User)
