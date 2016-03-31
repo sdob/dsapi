@@ -54,6 +54,40 @@ class ProfileFollowTestCase(APITestCase):
         response = self.client.get(reverse('profile-my-feed'))
 
 
+class FollowSuggestionsTestCase(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.client.force_authenticate(self.user)
+
+    def test_follower_is_suggested(self):
+        follower = UserFactory()
+        follow(follower, self.user)
+        response = self.client.get(reverse('profile-my-suggestions'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, list)
+        ids = [_['id'] for _ in response.data]
+        # Check that the follower is suggested
+        self.assertIn(str(follower.profile.id), ids)
+
+    def test_followed_user_is_not_suggested(self):
+        followed_user = UserFactory()
+        follow(self.user, followed_user)
+        response = self.client.get(reverse('profile-my-suggestions'))
+        self.assertIsInstance(response.data, list)
+        ids = [_['id'] for _ in response.data]
+        self.assertNotIn(str(followed_user.profile.id), ids)
+
+    def test_follow_of_follow_is_suggested(self):
+        followed_user = UserFactory()
+        follow_of_follow = UserFactory()
+        follow(self.user, followed_user)
+        follow(followed_user, follow_of_follow)
+        response = self.client.get(reverse('profile-my-suggestions'))
+        self.assertIsInstance(response.data, list)
+        ids = [_['id'] for _ in response.data]
+        self.assertIn(str(follow_of_follow.profile.id), ids)
+
+
 class ProfileFeedTestCase(APITestCase):
 
     def setUp(self):
