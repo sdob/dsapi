@@ -43,7 +43,7 @@ class ProfileViewSet(viewsets.GenericViewSet,
         profile = get_object_or_404(queryset, pk=pk)
         user = profile.user
         # Now get django-activity-stream to follow
-        data = follow(request.user, user)
+        data = follow(request.user, user, send_action=False)
         # TODO: Return something informative to the client
         return Response({}, status=status.HTTP_200_OK, content_type='json')
 
@@ -76,7 +76,7 @@ class ProfileViewSet(viewsets.GenericViewSet,
         profile = get_object_or_404(queryset, pk=pk)
         user = profile.user
         # Now get django-activity-stream to follow
-        data = unfollow(request.user, user)
+        data = unfollow(request.user, user, send_action=False)
         # TODO: Return something informative to the client
         return Response({}, status=status.HTTP_200_OK, content_type='json')
 
