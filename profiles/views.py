@@ -123,13 +123,18 @@ class ProfileViewSet(viewsets.GenericViewSet,
         # Big method. We'll start with followers, then have follows of follows
         user = request.user
         users_following_me = [u for u in followers(user) if not Follow.objects.is_following(user, u)]
+        followers_of_follows = []
         follows_of_follows = []
         # Now look at the users that we're following
         for user_i_follow in following(user):
             for follow_of_follow in following(user_i_follow):
                 if follow_of_follow.id != user.id and not Follow.objects.is_following(user, follow_of_follow):
                     follows_of_follows += [follow_of_follow]
-        target_profiles = set([_.profile for _ in users_following_me + follows_of_follows])
+            for follower_of_follow in followers(user):
+                if follower_of_follow.id != user.id and not Follow.objects.is_following(user, follower_of_follow):
+                    followers_of_follows += [follower_of_follow]
+
+        target_profiles = set([_.profile for _ in users_following_me + follows_of_follows + followers_of_follows])
         print(target_profiles)
         serializer = MinimalProfileSerializer(target_profiles, many=True)
         return Response(serializer.data)
