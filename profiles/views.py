@@ -127,7 +127,7 @@ class ProfileViewSet(viewsets.GenericViewSet,
         # Now look at the users that we're following
         for user_i_follow in following(user):
             for follow_of_follow in following(user_i_follow):
-                if follow_of_follow is not user and not Follow.objects.is_following(user, follow_of_follow):
+                if follow_of_follow.id != user.id and not Follow.objects.is_following(user, follow_of_follow):
                     follows_of_follows += [follow_of_follow]
         target_profiles = set([_.profile for _ in users_following_me + follows_of_follows])
         print(target_profiles)
