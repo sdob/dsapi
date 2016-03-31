@@ -1,5 +1,5 @@
 from actstream.actions import follow, unfollow
-from actstream.models import Action, followers, following, user_stream
+from actstream.models import Action, Follow, followers, following, user_stream
 from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404
 from rest_framework import exceptions
@@ -115,6 +115,22 @@ class ProfileViewSet(viewsets.GenericViewSet,
         user = request.user
         targets = following(user, User)
         target_profiles = [_.profile for _ in targets]
+        serializer = MinimalProfileSerializer(target_profiles, many=True)
+        return Response(serializer.data)
+
+    @list_route(methods=['get'], permission_classes=[IsAuthenticated])
+    def my_suggestions(self, request):
+        # Big method. We'll start with followers, then have follows of follows
+        user = request.user
+        users_following_me = [u for u in followers(user) if not Follow.objects.is_following(user, u)]
+        follows_of_follows = []
+        # Now look at the users that we're following
+        for user_i_follow in following(user):
+            for follow_of_follow in following(user_i_follow):
+                if follow_of_follow is not user and not Follow.objects.is_following(user, follow_of_follow):
+                    follows_of_follows += [follow_of_follow]
+        target_profiles = set([_.profile for _ in users_following_me + follows_of_follows])
+        print(target_profiles)
         serializer = MinimalProfileSerializer(target_profiles, many=True)
         return Response(serializer.data)
 
