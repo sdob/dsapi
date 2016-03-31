@@ -130,7 +130,7 @@ class ProfileViewSet(viewsets.GenericViewSet,
             for follow_of_follow in following(user_i_follow):
                 if follow_of_follow.id != user.id and not Follow.objects.is_following(user, follow_of_follow):
                     follows_of_follows += [follow_of_follow]
-            for follower_of_follow in followers(user):
+            for follower_of_follow in followers(user_i_follow):
                 if follower_of_follow.id != user.id and not Follow.objects.is_following(user, follower_of_follow):
                     followers_of_follows += [follower_of_follow]
 
