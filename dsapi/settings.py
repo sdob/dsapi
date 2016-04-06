@@ -182,6 +182,25 @@ SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 ACCOUNT_USERNAME_REQUIRED = False # could be the issue
 
+SOCIALACCOUNT_PROVIDERS = {
+        'facebook': {
+            'SCOPE': ['email', 'public_profile', 'user_friends'],
+            'FIELDS': [
+                'id',
+                'email',
+                'first_name',
+                'last_name',
+                'verified',
+                'locale',
+                'timezone',
+                'link',
+                'gender',
+                'updated_time',
+                'friends',
+                ],
+            }
+        }
+
 # Social authentication callback URLs
 FACEBOOK_AUTH_CALLBACK_URL = os.environ.get('FACEBOOK_AUTH_CALLBACK_URL') or 'http://localhost:9000/'
 GOOGLE_AUTH_CALLBACK_URL = os.environ.get('GOOGLE_AUTH_CALLBACK_URL') or 'http://localhost:9000/'
