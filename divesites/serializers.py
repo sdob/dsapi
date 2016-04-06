@@ -55,6 +55,7 @@ class DiveSerializer(serializers.ModelSerializer):
         model = models.Dive
         fields = ('comment', 'diver', 'id', 'depth', 'duration', 'divesite',
                 'date', 'time',
+                'average_depth',
                 'cylinder_capacity', 'pressure_in', 'pressure_out', 'gas_mix',
                 'air_temperature', 'water_temperature',
                 'weather', 'wind',

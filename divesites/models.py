@@ -121,6 +121,9 @@ class Dive(models.Model):
     # Creation metadata
     creation_date = models.DateTimeField(auto_now_add=True)
 
+    # Average depth; optional field
+    average_depth = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
+
     # Cylinder size and pressure. We could do model-level checking that
     # these are non-negative, but that's for the future. Note that this
     # model assumes single-tank diving (or at least forces divers to do
