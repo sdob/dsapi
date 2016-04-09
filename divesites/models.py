@@ -2,6 +2,7 @@ import uuid
 import urllib.request
 import urllib.error
 from actstream import action
+from caching.base import CachingManager, CachingMixin
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 from django.contrib.contenttypes.fields import GenericRelation
@@ -29,7 +30,7 @@ def retrieve_geocoding_data(lat, lng):
         return None
 
 
-class Divesite(models.Model):
+class Divesite(CachingMixin, models.Model):
 
     BOULDERS = 'Blds'
     CLAY = 'Cl'
@@ -37,6 +38,8 @@ class Divesite(models.Model):
     MUD = 'M'
     ROCKY = 'Rk'
     SAND = 'S'
+
+    objects = CachingManager()
 
     def __str__(self):
         return self.name
