@@ -233,3 +233,6 @@ def get_cache():
                     }
                 }
 CACHES = get_cache()
+
+# Cache Machine-specific settings
+CACHE_INVALIDATE_ON_CREATE = 'whole-model'
