@@ -108,9 +108,11 @@ class Divesite(CachingMixin, models.Model):
         super(Divesite, self).save(*args, **kwargs)
 
 
-class Dive(models.Model):
+class Dive(CachingMixin, models.Model):
     class Meta:
         ordering = ['date', 'time']
+
+    objects = CachingManager()
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     comment = models.TextField(blank=True)
