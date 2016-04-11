@@ -39,6 +39,7 @@ class Divesite(CachingMixin, models.Model):
     ROCKY = 'Rk'
     SAND = 'S'
 
+    # Configure Cache Machine
     objects = CachingManager()
 
     def __str__(self):
@@ -179,9 +180,12 @@ class Dive(CachingMixin, models.Model):
         super(Dive, self).save(*args, **kwargs)
 
 
-class Compressor(models.Model):
+class Compressor(CachingMixin, models.Model):
     def __str__(self):
         return self.name
+
+    # Configure Cache Machine
+    objects = CachingManager()
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
@@ -206,9 +210,12 @@ class Compressor(models.Model):
         super(Compressor, self).save(*args, **kwargs)
 
 
-class Slipway(models.Model):
+class Slipway(CachingMixin, models.Model):
     def __str__(self):
         return self.name
+
+    # Configure Cache Machine
+    objects = CachingManager()
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
