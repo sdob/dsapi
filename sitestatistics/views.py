@@ -16,7 +16,11 @@ def site_statistics(request):
     divesites = Divesite.objects.count()
     images = Image.objects.count()
     slipways = Slipway.objects.count()
-    total_hours_underwater = int(sum([t[0].seconds for t in Dive.objects.all().values_list('duration')]) / 3600)
+    # Cache Machine doesn't play well with values_list
+    # (see https://github.com/django-cache-machine/django-cache-machine/issues/116)
+    # so we'll just ask for the full set of Dive objects and then iterate over them
+    # rather than getting nothing but their duration
+    total_hours_underwater = int(sum([dive.duration.seconds for dive in Dive.objects.all()]) / 3600)
     users = Profile.objects.count()
     obj = {
             'compressors': compressors,
