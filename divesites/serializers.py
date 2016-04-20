@@ -75,13 +75,21 @@ class DiveSerializer(serializers.ModelSerializer):
         return duration
 
 
+class MinimalDivesiteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Divesite
+        fields = ('id', 'name')
+
+
 class DiveListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Dive
         fields = ('id', 'comment', 'depth', 'duration', 'date', 'time', 'divesite', 'diver',
-                'air_temperature', 'water_temperature',)
+                'cylinder_capacity', 'pressure_in', 'pressure_out', 'gas_mix',
+                'air_temperature', 'water_temperature',
+                'weather', 'wind',)
     diver = MinimalProfileSerializer(source='diver.profile', read_only=True)
-    divesite = serializers.PrimaryKeyRelatedField(read_only=True)
+    divesite = MinimalDivesiteSerializer(read_only=True)
 
 
 class DivesiteSerializer(serializers.ModelSerializer):
