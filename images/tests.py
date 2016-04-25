@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.files import File
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from faker import Factory
 from rest_framework import status
 from rest_framework.test import APITestCase
 from divesites.models import Compressor, Divesite, Slipway
@@ -12,6 +13,8 @@ from divesites.factories import CompressorFactory, DivesiteFactory, SlipwayFacto
 from dsapi import settings
 
 from images.models import Image
+
+faker = Factory.create()
 
 
 # This *currently* fixes the problem that was causing Travis to fail,
@@ -196,3 +199,36 @@ class HeaderImageSetTestCase(APITestCase):
     def test_unauthenticated_user_cannot_set_header_image(self, mock):
         response = self.client.delete(reverse('divesite-header-image', args=[self.divesite.id]))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+@patch('cloudinary.uploader.call_api')
+class ImageCaptionTestCase(APITestCase):
+
+    def setUp(self):
+        self.owner = UserFactory()
+        self.divesite = DivesiteFactory(owner=self.owner)
+        self.image = Image.objects.create(
+                content_object=self.divesite,
+                owner=self.owner
+                )
+
+    def test_can_edit_captions(self, mock):
+        caption = 'This is a caption'
+        data = {
+                'caption': caption
+                }
+        self.client.force_authenticate(self.owner)
+        response = self.client.patch(reverse('divesite-image-detail', args=[self.divesite.pk, self.image.pk]), data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        new_caption = Image.objects.get(pk=self.image.pk).caption
+        self.assertEqual(caption, new_caption)
+
+    def test_cannot_reassign_image_owner(self, mock):
+        u2 = UserFactory()
+        data = {
+                'owner': u2
+                }
+        print(data)
+        self.client.force_authenticate(self.owner)
+        response = self.client.patch(reverse('divesite-image-detail', args=[self.divesite.pk, self.image.pk]), data=data)
+        self.assertEqual(self.image.owner.id, self.owner.id)
