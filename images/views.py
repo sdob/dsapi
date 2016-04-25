@@ -12,7 +12,7 @@ from .models import Image
 from .serializers import ImageSerializer
 
 class ImageViewSet(viewsets.ModelViewSet):
-    parser_classes = (FormParser, MultiPartParser,)
+    parser_classes = (FormParser, MultiPartParser, JSONParser,)
     permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
