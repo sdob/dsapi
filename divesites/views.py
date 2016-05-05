@@ -19,6 +19,11 @@ from images.serializers import ImageSerializer
 
 class BaseSiteViewSet(viewsets.ModelViewSet):
 
+    # The default permission classes are
+    # (a) safe methods only if unauthenticated;
+    # (b) safe methods only if not the owner of the site
+    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
+
     @detail_route(methods=['get', 'post', 'delete'])
     def header_image(self, request, pk):
         # Permissions here should be handled by the viewset's permission_classes
@@ -72,7 +77,6 @@ class BaseSiteViewSet(viewsets.ModelViewSet):
 
 class DivesiteViewSet(BaseSiteViewSet):
 
-    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
     queryset = Divesite.objects.all()
     serializer_class = DivesiteSerializer
 
@@ -152,7 +156,6 @@ class DiveViewSet(viewsets.GenericViewSet,
 
 
 class CompressorViewSet(BaseSiteViewSet):
-    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
     queryset = Compressor.objects.all()
     serializer_class = CompressorSerializer
 
@@ -171,7 +174,6 @@ class CompressorViewSet(BaseSiteViewSet):
 
 
 class SlipwayViewSet(BaseSiteViewSet):
-    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
     queryset = Slipway.objects.all()
     serializer_class = SlipwaySerializer
 
