@@ -4,6 +4,7 @@ from .models import Profile
 from django.contrib.auth.models import User
 from divesites.models import Compressor, Dive, Divesite, Slipway
 from comments.models import CompressorComment, DivesiteComment, SlipwayComment
+from images.serializers import UserProfileImageSerializer
 #from comments.serializers import DivesiteCommentSerializer
 
 
@@ -46,7 +47,8 @@ class MinimalProfileSerializer(serializers.ModelSerializer):
     # a Profile serializer that just provides ID and name fields
     class Meta:
         model = Profile
-        fields = ('id', 'name',)
+        fields = ('id', 'name', 'profile_image',)
+    profile_image = UserProfileImageSerializer(source='user.profile_image', read_only=True)
 
 
 class UnattributedCompressorCommentSerializer(serializers.ModelSerializer):
