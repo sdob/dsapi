@@ -1,8 +1,16 @@
 from rest_framework import serializers
-from profiles.serializers import MinimalProfileSerializer
+from profiles.models import Profile
 from .models import Image, UserProfileImage
 
+
 class ImageSerializer(serializers.ModelSerializer):
+    # Rolling our own serializer here allows us to import from here
+    # into profiles.serializers
+    class MinimalProfileSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Profile
+            fields = ('id', 'name',)
+
     class Meta:
         model = Image
     owner = MinimalProfileSerializer(source='owner.profile', read_only=True)
