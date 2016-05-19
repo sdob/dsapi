@@ -86,6 +86,7 @@ class OwnProfileSerializer(serializers.ModelSerializer):
     dives_in_last_365_days = serializers.ReadOnlyField(source='count_dives_in_last_365_days');
     dives_in_last_90_days = serializers.ReadOnlyField(source='count_dives_in_last_90_days');
     slipways = UnattributedSlipwaySerializer(source='user.slipways', many=True, read_only=True)
+    profile_image = UserProfileImageSerializer(source='user.profile_image', read_only=True)
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -99,6 +100,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     divesites_visited = serializers.ReadOnlyField(source='get_number_of_divesites_visited');
     date_joined = serializers.ReadOnlyField(source='user.date_joined', read_only=True)
     hours_underwater = serializers.ReadOnlyField(source='get_hours_underwater')
+    profile_image = UserProfileImageSerializer(source='user.profile_image', read_only=True)
 
 
 # Generic related field for django-activity-stream objects.
